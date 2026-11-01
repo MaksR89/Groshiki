@@ -1,0 +1,6 @@
+<!doctype html>
+<meta charset="utf-8">
+<script>
+try { GroshikiMigrate.onBook(localStorage.getItem("smeta-ledger-v1") || ""); }
+catch (e) { GroshikiMigrate.onBook(""); }
+</script>
