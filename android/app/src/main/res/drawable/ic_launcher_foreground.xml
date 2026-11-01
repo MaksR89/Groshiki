@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:pivotX="0"
+        android:pivotY="0"
+        android:scaleX="0.56"
+        android:scaleY="0.56"
+        android:translateX="33.56"
+        android:translateY="28.8">
+        <path
+            android:fillColor="#F4EFE6"
+            android:fillType="evenOdd"
+            android:pathData="M0.26 58.54L13.02 58.28L13.02 0.26L62.54 0.26L62.54 10.06L22.82 10.06L22.69 37.13L45.00 37.13L50.80 37.78L58.54 40.62L63.57 44.10L66.40 46.93L68.85 50.29L70.92 54.41L72.21 58.80L72.59 64.34L72.08 68.60L70.40 73.62L67.44 78.65L63.95 82.39L56.60 87.16L52.22 88.71L47.32 89.61L13.02 89.61L13.02 68.47L0.26 68.21L0.26 58.54ZM22.82 46.93L22.82 58.54L45.26 58.54L45.26 68.21L22.82 68.21L22.82 79.94L46.16 79.94L49.38 79.43L52.09 78.52L56.48 75.95L60.73 71.17L62.79 65.37L62.41 59.57L59.83 54.28L55.32 50.03L51.19 47.97L46.68 46.93L22.82 46.93Z" />
+    </group>
+</vector>

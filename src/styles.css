@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
+  --font-display: "Literata", Georgia, serif;
+
+  --color-desk: #e7dfd2;
+  --color-bg: #f4efe6;
+  --color-surface: #fffdf8;
+  --color-ink: #1c1712;
+  --color-muted: #6f675e;
+  --color-line: #e3d8c8;
+  --color-chip: #f1e9dc;
+  --color-expense: #b4332a;
+  --color-income: #1b6b45;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    font-family: var(--font-sans);
+    background: var(--color-desk);
+    color: var(--color-ink);
+    color-scheme: light;
+    text-wrap: pretty;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  input, select, textarea {
+    font: inherit;
+  }
+}
+
+.pb-nav {
+  padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+}
+.nav-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@keyframes smeta-caret {
+  0%, 45% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.smeta-caret {
+  animation: smeta-caret 1.05s steps(1) infinite;
+}
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  height: 100dvh;
+  width: 100%;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+@media (min-width: 640px) {
+  .sheet {
+    inset: 1.25rem auto auto 50%;
+    height: calc(100dvh - 2.5rem);
+    width: 28rem;
+    transform: translateX(-50%);
+    overflow: hidden;
+    border: 1px solid var(--color-line);
+    border-radius: 1.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
