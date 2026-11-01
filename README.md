@@ -9,11 +9,7 @@
 
 Цифры на снимках выдуманы.
 
-<img src="docs/screenshots/splash.png" width="195" alt="Заставка">
-<img src="docs/screenshots/expenses.png" width="195" alt="Расходы">
-<img src="docs/screenshots/income.png" width="195" alt="Доходы">
-<img src="docs/screenshots/charges.png" width="195" alt="Зарядки">
-<img src="docs/screenshots/report.png" width="195" alt="Отчёт">
+![Заставка, расходы, доходы, зарядки и отчёт](docs/screenshots/row.png)
 
 ## Запись
 
