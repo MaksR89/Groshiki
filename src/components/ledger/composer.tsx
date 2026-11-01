@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { cn } from "@/components/ledger/bits";
-import { guessColor } from "@/lib/money/catalog";
+import { guessColor, ICON_KEYS, SWATCHES } from "@/lib/money/catalog";
 import { nowStamp } from "@/lib/money/dates";
 import { centsToInput, formatRawInput, inputToCents } from "@/lib/money/format";
 import { CatIcon } from "@/lib/money/icons";
@@ -42,6 +42,9 @@ export function Composer({
   const [time, setTime] = useState((editing?.at ?? nowStamp()).slice(11, 16));
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [newName, setNewName] = useState("");
+  const [newIcon, setNewIcon] = useState("ellipsis");
+  const [newColor, setNewColor] = useState(SWATCHES[0]);
+  const [adding, setAdding] = useState(false);
 
   const ranked = useMemo(() => {
     const counts = new Map<string, number>();
@@ -112,11 +115,14 @@ export function Composer({
       name,
       kind,
       group: "",
-      icon: "ellipsis",
-      color: guessColor(name),
+      icon: newIcon,
+      color: newColor,
     });
     setCategoryId(id);
     setNewName("");
+    setNewIcon("ellipsis");
+    setNewColor(guessColor(name));
+    setAdding(false);
   }
 
   const title = editing ? "Редактирование" : kind === "income" ? "Новый доход" : kind === "transfer" ? "Перевод" : "Новый расход";
@@ -211,17 +217,9 @@ export function Composer({
                   );
                 })}
               </div>
-              <div className="flex gap-2 pb-3">
-                <input
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Новая статья"
-                  className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-surface px-3 outline-none placeholder:text-muted"
-                />
-                <button type="button" onClick={createCategory} disabled={!newName.trim()} className="h-11 rounded-xl bg-chip px-3 font-medium disabled:opacity-40">
-                  Добавить
-                </button>
-              </div>
+              <button type="button" onClick={() => setAdding(true)} className="mb-3 h-11 w-full rounded-2xl bg-chip text-sm font-medium">
+                Добавить статью
+              </button>
             </div>
           ) : <div className="flex-1" />}
 
@@ -242,6 +240,40 @@ export function Composer({
                 {confirmDelete ? "Точно удалить" : "Удалить операцию"}
               </button>
             </div>
+          ) : null}
+          {adding ? (
+            <Dialog.Root open onOpenChange={(open) => { if (!open) setAdding(false); }}>
+              <Dialog.Portal>
+                <Dialog.Overlay className="fixed inset-0 z-50 bg-ink/40" />
+                <Dialog.Content className="sheet z-50" aria-describedby={undefined} onOpenAutoFocus={(e) => e.preventDefault()}>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <button type="button" onClick={() => setAdding(false)} className="grid size-11 place-items-center rounded-full bg-chip" aria-label="Закрыть">
+                      <X className="size-5" />
+                    </button>
+                    <Dialog.Title className="font-display text-xl">Новая статья</Dialog.Title>
+                    <button type="button" onClick={createCategory} disabled={!newName.trim()} className="h-11 rounded-full bg-ink px-4 font-medium text-surface disabled:opacity-40">
+                      Готово
+                    </button>
+                  </div>
+                  <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
+                    <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Название" className="h-11 w-full rounded-xl border border-line bg-surface px-3 outline-none placeholder:text-muted" />
+                    <p className="mt-4 text-sm text-muted">{kind === "income" ? "Значок дохода" : "Значок расхода"}</p>
+                    <div className="mt-2 grid grid-cols-6 gap-2">
+                      {ICON_KEYS.map((key) => (
+                        <button key={key} type="button" onClick={() => setNewIcon(key)} className={cn("grid h-11 place-items-center rounded-xl", newIcon === key ? "bg-ink text-surface" : "bg-chip")} style={newIcon === key ? undefined : { color: newColor }}>
+                          <CatIcon name={key} className="size-5" />
+                        </button>
+                      ))}
+                    </div>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {SWATCHES.map((swatch) => (
+                        <button key={swatch} type="button" aria-label={swatch} onClick={() => setNewColor(swatch)} className={cn("size-9 rounded-full", newColor === swatch && "ring-2 ring-ink ring-offset-2")} style={{ background: swatch }} />
+                      ))}
+                    </div>
+                  </div>
+                </Dialog.Content>
+              </Dialog.Portal>
+            </Dialog.Root>
           ) : null}
         </Dialog.Content>
       </Dialog.Portal>

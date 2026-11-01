@@ -320,7 +320,7 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
     var date by remember { mutableStateOf((editing?.at ?: nowStamp()).take(10)) }
     var time by remember { mutableStateOf((editing?.at ?: nowStamp()).drop(11).take(5)) }
     var confirm by remember { mutableStateOf(false) }
-    var newName by remember { mutableStateOf("") }
+    var adding by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val ranked = book.categories.filter { it.kind == kind || it.kind == "both" }.sortedWith(compareByDescending<Category> { cat -> book.entries.count { it.categoryId == cat.id && it.kind == kind } }.thenBy { it.name })
     val cents = inputToCents(raw)
@@ -331,6 +331,7 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
         if (editing == null) repo.addEntry(entry) else repo.updateEntry(entry)
         onClose()
     }
+    Box(Modifier.fillMaxSize()) {
     Sheet(if (editing != null) "Редактирование" else if (kind == "income") "Новый доход" else if (kind == "transfer") "Перевод" else "Новый расход", canSave, onClose, { save() }) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
             Row(Modifier.fillMaxWidth().clip(CircleShape).background(Chip).padding(4.dp)) {
@@ -381,18 +382,7 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
                         repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
                     }
                 }
-                Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    BasicTextField(newName, { newName = it }, textStyle = fieldStyle(), cursorBrush = caret, modifier = Modifier.weight(1f).height(44.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).padding(12.dp), decorationBox = { inner ->
-                        if (newName.isEmpty()) Text("Новая статья", color = Muted, fontFamily = Body)
-                        inner()
-                    })
-                    Text("Добавить", color = Ink, fontFamily = Body, fontWeight = FontWeight.Medium, modifier = Modifier.height(44.dp).clip(RoundedCornerShape(12.dp)).background(Chip).clickable {
-                        val name = newName.trim()
-                        if (name.isEmpty() || kind == "transfer") return@clickable
-                        categoryId = repo.addCategory(name, kind, "", "ellipsis", guessColor(name))
-                        newName = ""
-                    }.padding(horizontal = 12.dp, vertical = 12.dp))
-                }
+                Text("Добавить статью", color = Ink, fontFamily = Body, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Chip).clickable { adding = true }.padding(vertical = 12.dp))
             }
             if (editing != null) {
                 Text(if (confirm) "Точно удалить" else "Удалить операцию", color = Expense, fontFamily = Body, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 16.dp).fillMaxWidth().clickable {
@@ -401,6 +391,28 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
             }
         }
         Column(Modifier.padding(16.dp)) { Keypad { raw = applyKey(raw, it) } }
+    }
+    if (adding) NewCategorySheet(kind) { name, icon, color ->
+        if (name != null) categoryId = repo.addCategory(name, kind, "", icon, color)
+        adding = false
+    }
+    }
+}
+
+@Composable
+private fun NewCategorySheet(kind: String, onDone: (name: String?, icon: String, color: String) -> Unit) {
+    var name by remember { mutableStateOf("") }
+    var icon by remember { mutableStateOf("ellipsis") }
+    var color by remember { mutableStateOf(SWATCHES[0]) }
+    Sheet("Новая статья", name.isNotBlank(), { onDone(null, icon, color) }, {
+        onDone(name.trim(), icon, color)
+    }, Ink) {
+        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp)) {
+            Field(name, { name = it }, "Название")
+            Text(if (kind == "income") "Значок дохода" else "Значок расхода", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 16.dp))
+            IconGrid(icon, parseHex(color)) { icon = it }
+            Swatches(color) { color = it }
+        }
     }
 }
 
