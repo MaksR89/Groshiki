@@ -1,9 +1,13 @@
-export const APP_VERSION = "1.4.1";
+export const APP_VERSION = "1.5.0";
 
 /** Версия формата книги. Увеличивать только вместе с migrate в store.ts. Ключ localStorage не менять. */
 export const DATA_VERSION = 1;
 
 export const CHANGELOG: { version: string; notes: string[] }[] = [
+  {
+    version: "1.5.0",
+    notes: ["Телефонные экраны на Kotlin повторяют книгу: шапка, карточки, значки, знак рубля.", "При обновлении книга читается из прежней установки."],
+  },
   {
     version: "1.4.1",
     notes: ["На телефоне снова тот же экран, что в книге: значки, знак рубля и прежние записи."],
