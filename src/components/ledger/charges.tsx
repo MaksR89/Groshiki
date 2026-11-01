@@ -4,7 +4,7 @@ import { ChevronDown, X } from "lucide-react";
 import { cn } from "@/components/ledger/bits";
 import { ICON_KEYS, SWATCHES } from "@/lib/money/catalog";
 import { dayLabel, nowStamp, todayKey } from "@/lib/money/dates";
-import { BynMark, Money } from "@/components/ledger/byn";
+import { BookMark, Money } from "@/components/ledger/byn";
 import { centsToInput, formatKwh, parseLooseCents } from "@/lib/money/format";
 import { CatIcon } from "@/lib/money/icons";
 import { AmountButton, applyKey, Keypad } from "@/components/ledger/keypad";
@@ -287,7 +287,7 @@ function ChargeDialog({ charge, onClose }: { charge: Charge | null; onClose: () 
               <AmountButton raw={kwhRaw} active={field === "kwh"} placeholder="0" onPress={() => setField("kwh")} />
             </label>
             <label className="mt-3 block text-sm text-muted">
-              Цена за кВт·ч, <BynMark className="inline-block h-[0.9em] w-auto translate-y-[0.12em]" />
+              Цена за кВт·ч, <BookMark className="inline-block h-[0.9em] w-auto translate-y-[0.12em]" />
               <AmountButton raw={rateRaw} active={field === "rate"} placeholder="0,73" onPress={() => setField("rate")} />
             </label>
             <div className="mt-3 grid grid-cols-2 gap-2">

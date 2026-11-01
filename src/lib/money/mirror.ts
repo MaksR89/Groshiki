@@ -15,6 +15,7 @@ export type MirroredBook = {
   showReport?: boolean;
   showReserve?: boolean;
   reserveHash?: string;
+  currency?: string;
   aids?: unknown[];
   holds?: unknown[];
   deposits?: unknown[];

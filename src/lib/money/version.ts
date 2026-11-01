@@ -1,9 +1,13 @@
-export const APP_VERSION = "1.5.1";
+export const APP_VERSION = "1.5.2";
 
 /** Версия формата книги. Увеличивать только вместе с migrate в store.ts. Ключ localStorage не менять. */
 export const DATA_VERSION = 1;
 
 export const CHANGELOG: { version: string; notes: string[] }[] = [
+  {
+    version: "1.5.2",
+    notes: ["В книге выбирается валюта учёта: белорусский рубль, доллар, евро или российский рубль. Курс не считается."],
+  },
   {
     version: "1.5.1",
     notes: ["Новая статья в доходе и расходе: название и значок из набора."],

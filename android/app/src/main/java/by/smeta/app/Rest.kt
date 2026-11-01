@@ -188,7 +188,7 @@ private fun ChargeSheet(repo: Repo, charge: Charge?, onClose: () -> Unit) {
             AmountButton(kwhRaw, field == "kwh", "0") { field = "kwh" }
             Row(Modifier.padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text("Цена за кВт·ч, ", color = Muted, fontFamily = Body, fontSize = 14.sp)
-                BynMark(tint = Muted, height = 12.dp)
+                MoneyMark(LocalMoney.current, Muted, 12.dp)
             }
             AmountButton(rateRaw, field == "rate", "0,73") { field = "rate" }
             Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -289,7 +289,12 @@ fun ReportScreen(repo: Repo, onOpen: (Entry) -> Unit) {
             }
             MoneyText(chargeCost, color = if (kind == "charge") Chip else Muted, size = 14.sp)
         }
-        if (kind != "charge") Text("Разница ${formatMoney(earned - spent, true)}", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 12.dp))
+        if (kind != "charge") {
+            Row(Modifier.padding(top = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text("Разница ", color = Muted, fontFamily = Body, fontSize = 14.sp)
+                MoneyText(earned - spent, color = Muted, size = 14.sp, sign = true)
+            }
+        }
         val drillId = drill
         if (drillId != null) {
             Text("← К диаграмме", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 16.dp).clickable { drill = null })
@@ -324,7 +329,7 @@ fun ReportScreen(repo: Repo, onOpen: (Entry) -> Unit) {
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     if (kind == "charge") Text(formatKwh(chargeKwh), color = Ink, fontFamily = Display, fontSize = 20.sp) else MoneyText(total, size = 20.sp, font = Display)
-                    Text(if (kind == "charge") formatMoney(total) else if (slices.size == 1) "1 статья" else "${slices.size} статей", color = Muted, fontFamily = Body, fontSize = 12.sp)
+                    if (kind == "charge") MoneyText(total, color = Muted, size = 12.sp) else Text(if (slices.size == 1) "1 статья" else "${slices.size} статей", color = Muted, fontFamily = Body, fontSize = 12.sp)
                 }
             }
             if (mode == "year") YearBars(book, kind, anchor.take(4).toInt(), accountId)
@@ -403,6 +408,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
     var message by remember { mutableStateOf<String?>(null) }
     var confirm by remember { mutableStateOf(false) }
     var pass by remember { mutableStateOf<String?>(null) }
+    var currencyOpen by remember { mutableStateOf(false) }
     val open = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
         val name = context.contentResolver.query(uri, null, null, null, null)?.use { c ->
@@ -430,6 +436,19 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
             else "${formatCount(book.entries.size)} операций${if (first != null && last != null) ", $first–$last" else ""}.",
             color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 12.dp),
         )
+        Text("Валюта учёта", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 16.dp))
+        val currencies = listOf("BYN" to "Бел. рубль", "USD" to "Доллар", "EUR" to "Евро", "RUB" to "Росс. рубль")
+        val current = currencies.find { it.first == book.currency }?.second ?: "Бел. рубль"
+        Row(Modifier.padding(top = 4.dp).fillMaxWidth().height(48.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).background(Surface, RoundedCornerShape(12.dp)).clickable { currencyOpen = !currencyOpen }.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(current, color = Ink, fontFamily = Body, modifier = Modifier.weight(1f))
+            LineIcon("chevron-down", tint = Muted, size = 20.dp, modifier = Modifier.rotate(if (currencyOpen) 180f else 0f))
+        }
+        if (currencyOpen) Column(Modifier.padding(top = 8.dp).clip(RoundedCornerShape(12.dp)).background(Surface)) {
+            currencies.forEach { (id, label) ->
+                Text(label, color = Ink, fontFamily = Body, modifier = Modifier.fillMaxWidth().background(if (book.currency == id) Chip else Color.Transparent).clickable { repo.update { it.copy(currency = id) }; currencyOpen = false }.padding(horizontal = 12.dp, vertical = 12.dp))
+            }
+        }
+        Text("Суммы не пересчитываются. Меняется только знак.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
         SwitchRow("Показывать остаток", book.showBalance) { repo.update { it.copy(showBalance = !it.showBalance) } }
         Text("Это текущий остаток счёта, не оборот за всё время.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp, start = 4.dp))
         Text("Расходы и доходы всегда в меню. Остальные разделы можно выключить.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 12.dp, start = 4.dp))
@@ -458,7 +477,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
                 Text("Отмена", color = Ink, modifier = Modifier.clickable { confirm = false }.padding(10.dp))
             }
         }
-        Text("Версия 1.5.1", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
+        Text("Версия 1.5.2", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
     }
     if (pass != null) Column(Modifier.fillMaxSize().background(Desk)) {
         LockBody(repo, if (pass == "create") "create" else "change", "Другое") { pass = null }
@@ -473,7 +492,7 @@ private fun toCsv(book: Book): String {
         val cat = book.categories.find { it.id == e.categoryId }
         val acc = book.accounts.find { it.id == e.accountId }?.name ?: ""
         val sign = if (e.kind == "income") "" else "-"
-        lines.add("${e.at};$sign${formatMoney(e.amount)};BYN;$acc;${cat?.name ?: ""};${cat?.group ?: ""};${e.note}")
+        lines.add("${e.at};$sign${formatMoney(e.amount)};${book.currency};$acc;${cat?.name ?: ""};${cat?.group ?: ""};${e.note}")
     }
     return lines.joinToString("\n")
 }

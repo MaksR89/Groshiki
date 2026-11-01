@@ -46,6 +46,7 @@ data class Book(
     val showReport: Boolean = true,
     val showReserve: Boolean = false,
     val reserveHash: String = "",
+    val currency: String = "BYN",
 )
 
 fun newId(prefix: String) = "$prefix-${UUID.randomUUID()}"
@@ -84,6 +85,7 @@ fun Book.toJson(): JSONObject = JSONObject().apply {
     put("showReport", showReport)
     put("showReserve", showReserve)
     put("reserveHash", reserveHash)
+    put("currency", currency)
 }
 
 private fun MoneyRow.toJson(withWho: Boolean): JSONObject = JSONObject().put("id", id).put("amount", amount).put("currency", currency).put("note", note).put("at", at).apply {
@@ -109,6 +111,7 @@ fun bookFromJson(raw: JSONObject): Book {
         showReport = if (root.has("showReport")) root.optBoolean("showReport") else true,
         showReserve = root.optBoolean("showReserve", false),
         reserveHash = root.optString("reserveHash", ""),
+        currency = root.optString("currency", "BYN").let { if (it in setOf("BYN", "USD", "EUR", "RUB")) it else "BYN" },
     ).withOperators()
 }
 

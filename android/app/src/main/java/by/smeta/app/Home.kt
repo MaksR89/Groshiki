@@ -30,6 +30,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,6 +94,7 @@ private fun Shell(repo: Repo) {
     }
     if (tabs.none { it.id == tab }) tab = "expenses"
     val kind = if (tab == "income") "income" else "expense"
+    CompositionLocalProvider(LocalMoney provides book.currency) {
     Column(Modifier.fillMaxSize().background(Desk).statusBarsPadding()) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
@@ -172,6 +174,7 @@ private fun Shell(repo: Repo) {
     }
     composer?.let { (initial, editing) ->
         ComposerSheet(repo, initial, editing) { composer = null }
+    }
     }
 }
 

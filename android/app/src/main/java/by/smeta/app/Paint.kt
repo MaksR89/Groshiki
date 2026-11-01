@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,19 +83,27 @@ fun BynMark(modifier: Modifier = Modifier, tint: Color = Ink, height: Dp = 14.dp
     }
 }
 
+val LocalMoney = compositionLocalOf { "BYN" }
+
 @Composable
-fun MoneyText(cents: Long, modifier: Modifier = Modifier, color: Color = Ink, size: TextUnit = 16.sp, sign: Boolean = false, font: FontFamily = Body, weight: FontWeight = FontWeight.Medium) {
+fun MoneyText(cents: Long, modifier: Modifier = Modifier, color: Color = Ink, size: TextUnit = 16.sp, sign: Boolean = false, font: FontFamily = Body, weight: FontWeight = FontWeight.Medium, currency: String? = null) {
+    val code = currency ?: LocalMoney.current
     androidx.compose.foundation.layout.Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Text(formatMoney(cents, sign), color = color, fontFamily = font, fontSize = size, fontWeight = weight)
-        BynMark(tint = color, height = (size.value * 0.62f).dp, modifier = Modifier.padding(start = 2.dp))
+        MoneyMark(code, color, (size.value * 0.62f).dp)
     }
 }
 
 @Composable
+fun MoneyMark(code: String, tint: Color = Ink, height: Dp = 14.dp) {
+    val mark = when (code) { "EUR" -> "€"; "USD" -> "$"; "RUB" -> "₽"; else -> "" }
+    if (mark.isEmpty()) BynMark(tint = tint, height = height, modifier = Modifier.padding(start = 2.dp))
+    else Text(mark, color = tint, fontFamily = Body, fontSize = (height.value * 0.85f).sp, modifier = Modifier.padding(start = 2.dp))
+}
+
+@Composable
 fun ForeignSum(cents: Long, currency: String, size: TextUnit = 22.sp, color: Color = Ink) {
-    val mark = when (currency) { "EUR" -> "€"; "USD" -> "$"; "RUB" -> "₽"; else -> "" }
-    if (currency == "BYN" || mark.isEmpty()) MoneyText(cents, color = color, size = size, font = Display, weight = FontWeight.SemiBold)
-    else Text("${formatMoney(cents)} $mark", color = color, fontFamily = Display, fontSize = size, fontWeight = FontWeight.SemiBold)
+    MoneyText(cents, color = color, size = size, font = Display, weight = FontWeight.SemiBold, currency = currency)
 }
 
 @Composable

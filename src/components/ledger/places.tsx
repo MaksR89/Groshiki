@@ -268,6 +268,8 @@ export function MoreView({
   const setShowReserve = useLedger((s) => s.setShowReserve);
   const setShowCharges = useLedger((s) => s.setShowCharges);
   const setShowReport = useLedger((s) => s.setShowReport);
+  const currency = useLedger((s) => s.currency);
+  const setCurrency = useLedger((s) => s.setCurrency);
   const [passMode, setPassMode] = useState<"create" | "change" | null>(null);
   const balance = totalBalance(accounts, entries);
   const first = entries[0]?.at.slice(0, 4);
@@ -304,6 +306,21 @@ export function MoreView({
           ? <>{formatCount(entries.length)} операций{first && last ? `, ${first}–${last}` : ""}{showBalance ? <>. На счетах сейчас <Money cents={balance} /></> : null}.</>
           : "Пока пусто. Загрузите выгрузку Деньги OK или добавьте операцию."}
       </p>
+
+      <label className="mt-5 block text-sm text-muted">
+        Валюта учёта
+        <select
+          value={currency}
+          onChange={(e) => setCurrency(e.target.value as typeof currency)}
+          className="mt-1 h-11 w-full rounded-xl border border-line bg-surface px-3 text-base text-ink"
+        >
+          <option value="BYN">Бел. рубль</option>
+          <option value="USD">Доллар</option>
+          <option value="EUR">Евро</option>
+          <option value="RUB">Росс. рубль</option>
+        </select>
+      </label>
+      <p className="mt-2 px-1 text-sm leading-relaxed text-muted">Суммы не пересчитываются. Меняется только знак. «Другое» ведёт свою валюту.</p>
 
       <div className="mt-5 grid gap-2">
         <button

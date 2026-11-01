@@ -4,7 +4,7 @@ import { OPERATORS } from "@/lib/money/operators";
 import { compareEntries } from "@/lib/money/io";
 import { mirrorBook, readMirror, type MirroredBook } from "@/lib/money/mirror";
 import { DATA_VERSION } from "@/lib/money/version";
-import type { Account, Aid, Category, Charge, Deposit, Entry, Hold, Kind, ReserveBook, Snapshot, Source, Station } from "@/lib/money/types";
+import type { Account, Aid, Category, Charge, Deposit, Entry, Hold, Kind, ReserveBook, Snapshot, Source, Station, Currency } from "@/lib/money/types";
 
 type LastCategory = { expense: string | null; income: string | null };
 
@@ -22,11 +22,13 @@ type LedgerState = Snapshot & {
   showReport: boolean;
   showReserve: boolean;
   reserveHash: string;
+  currency: Currency;
   setShowBalance: (on: boolean) => void;
   setShowCharges: (on: boolean) => void;
   setShowReport: (on: boolean) => void;
   setShowReserve: (on: boolean) => void;
   setReserveHash: (hash: string) => void;
+  setCurrency: (currency: Currency) => void;
   clearAll: () => void;
   replaceAll: (snapshot: Snapshot) => void;
   addEntry: (entry: Omit<Entry, "id">) => void;
@@ -87,11 +89,13 @@ export const useLedger = create<LedgerState>()(
       showReport: true,
       showReserve: false,
       reserveHash: "",
+      currency: "BYN",
       setShowBalance: (on) => set({ showBalance: on }),
       setShowCharges: (on) => set({ showCharges: on }),
       setShowReport: (on) => set({ showReport: on }),
       setShowReserve: (on) => set({ showReserve: on }),
       setReserveHash: (hash) => set({ reserveHash: hash }),
+      setCurrency: (currency) => set({ currency }),
       clearAll: () =>
         set({
           accounts: [],
@@ -218,6 +222,7 @@ export const useLedger = create<LedgerState>()(
         showReport: s.showReport,
         showReserve: s.showReserve,
         reserveHash: s.reserveHash,
+        currency: s.currency,
       }),
     },
   ),
@@ -288,6 +293,7 @@ function keepBook(raw: MirroredBook | undefined): {
   showReport: boolean;
   showReserve: boolean;
   reserveHash: string;
+  currency: Currency;
 } {
   const book = raw ?? {};
   const source: Source = book.source === "empty" || book.source === "moneyok" || book.source === "cleared" || book.source === "edited" ? book.source : "edited";
@@ -307,6 +313,7 @@ function keepBook(raw: MirroredBook | undefined): {
     showReport: book.showReport !== false,
     showReserve: book.showReserve === true,
     reserveHash: typeof book.reserveHash === "string" ? book.reserveHash : "",
+    currency: book.currency === "USD" || book.currency === "EUR" || book.currency === "RUB" || book.currency === "BYN" ? book.currency : "BYN",
   };
 }
 
@@ -344,6 +351,7 @@ function pickBook(state: LedgerState): MirroredBook {
     showReport: state.showReport,
     showReserve: state.showReserve,
     reserveHash: state.reserveHash,
+    currency: state.currency,
   };
 }
 
