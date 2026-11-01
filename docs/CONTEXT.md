@@ -61,11 +61,11 @@
 
 ## Версия
 
-`APP_VERSION` в `src/lib/money/version.ts`, сейчас `1.5.2`. Журнал: `docs/CHANGELOG.md` и массив `CHANGELOG` в том же файле. Новую версию дописывать в оба места.
+`APP_VERSION` в `src/lib/money/version.ts`, сейчас `1.5.3`. Журнал: `docs/CHANGELOG.md` и массив `CHANGELOG` в том же файле. Новую версию дописывать в оба места.
 
 Ключ `localStorage` — `smeta-ledger-v1`. Не переименовывать: иначе книга откроется пустой. `DATA_VERSION` поднимать только с `migrate`, который возвращает прежние операции, а не пустой объект. При ошибке чтения ключ не удалять.
 
-Android-пакет — проект `android/`, экраны на Kotlin и Jetpack Compose. Вид совпадает с книгой в `src/components/ledger`. При первом запуске 1.5.0, если своего файла ещё нет, приложение читает прежнюю книгу из WebView: `localStorage` ключ `smeta-ledger-v1`, иначе IndexedDB `smeta`. Дальше книга лежит в `filesDir/book.json`. `versionCode` 33, `versionName` 1.5.2. Валюта ежедневного учёта хранится в книге: BYN, USD, EUR или RUB. Курс не считается. Значки станций в `android/app/src/main/assets/stations`. Ключ подписи только в закрытом репозитории.
+Android-пакет — проект `android/`, экраны на Kotlin и Jetpack Compose. Вид совпадает с книгой в `src/components/ledger`. При первом запуске 1.5.0, если своего файла ещё нет, приложение читает прежнюю книгу из WebView: `localStorage` ключ `smeta-ledger-v1`, иначе IndexedDB `smeta`. Дальше книга лежит в `filesDir/book.json`. `versionCode` 34, `versionName` 1.5.3. Валюта ежедневного учёта хранится в книге: BYN, USD, EUR или RUB. Курс не считается. Значки станций в `android/app/src/main/assets/stations`. Ключ подписи только в закрытом репозитории.
 
 Выбор файла и сохранение копии больше не идут через WebView.
 

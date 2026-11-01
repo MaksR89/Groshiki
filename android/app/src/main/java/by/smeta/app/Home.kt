@@ -393,7 +393,7 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
                 })
             }
         }
-        Column(Modifier.padding(16.dp)) { Keypad { raw = applyKey(raw, it) } }
+        Column(Modifier.navigationBarsPadding().padding(16.dp)) { Keypad { raw = applyKey(raw, it) } }
     }
     if (adding) NewCategorySheet(kind) { name, icon, color ->
         if (name != null) categoryId = repo.addCategory(name, kind, "", icon, color)
