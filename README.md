@@ -9,11 +9,11 @@
 
 Цифры на снимках выдуманы.
 
-![Заставка](docs/screenshots/splash.png)
-![Расходы](docs/screenshots/expenses.png)
-![Доходы](docs/screenshots/income.png)
-![Зарядки](docs/screenshots/charges.png)
-![Отчёт](docs/screenshots/report.png)
+<img src="docs/screenshots/splash.png" width="195" alt="Заставка">
+<img src="docs/screenshots/expenses.png" width="195" alt="Расходы">
+<img src="docs/screenshots/income.png" width="195" alt="Доходы">
+<img src="docs/screenshots/charges.png" width="195" alt="Зарядки">
+<img src="docs/screenshots/report.png" width="195" alt="Отчёт">
 
 ## Запись
 
