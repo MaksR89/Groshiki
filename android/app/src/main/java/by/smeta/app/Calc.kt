@@ -133,8 +133,8 @@ fun CalcScreen() {
         loanAnswer = null
         miss = false
     }
-    Column(Modifier.fillMaxSize()) {
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
+    Box(Modifier.fillMaxSize()) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 260.dp)) {
             Text("Расчёт", color = Ink, fontFamily = Display, fontSize = 30.sp)
             Text("Считает по кнопке и не пишется в книгу. Год — 365 дней.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
             Row(Modifier.padding(top = 16.dp).fillMaxWidth().clip(CircleShape).background(Chip).padding(4.dp)) {
@@ -232,15 +232,18 @@ fun CalcScreen() {
                 }
             }
         }
-        Column(Modifier.padding(16.dp)) {
-            Keypad { key ->
-                wipe()
-                when (field) {
-                    "rate" -> rateRaw = applyKey(rateRaw, key)
-                    "term" -> if (key != "," && key != "±") termRaw = applyKey(termRaw, key).filter { it.isDigit() }.take(4)
-                    "extra" -> extraRaw = applyKey(extraRaw, key)
-                    "extraMonths" -> if (key != "," && key != "±") extraMonthsRaw = applyKey(extraMonthsRaw, key).filter { it.isDigit() }.take(4)
-                    else -> amountRaw = applyKey(amountRaw, key)
+        Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth().background(Desk)) {
+            Box(Modifier.fillMaxWidth().height(1.dp).background(Line))
+            Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+                Keypad { key ->
+                    wipe()
+                    when (field) {
+                        "rate" -> rateRaw = applyKey(rateRaw, key)
+                        "term" -> if (key != "," && key != "±") termRaw = applyKey(termRaw, key).filter { it.isDigit() }.take(4)
+                        "extra" -> extraRaw = applyKey(extraRaw, key)
+                        "extraMonths" -> if (key != "," && key != "±") extraMonthsRaw = applyKey(extraMonthsRaw, key).filter { it.isDigit() }.take(4)
+                        else -> amountRaw = applyKey(amountRaw, key)
+                    }
                 }
             }
         }

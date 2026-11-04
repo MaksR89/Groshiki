@@ -68,8 +68,8 @@ export function CalcView() {
   }
 
   return (
-    <div className="flex min-h-[calc(100dvh-11.5rem)] flex-col lg:min-h-0">
-      <div className="px-4 lg:px-0">
+    <>
+    <div className="px-4 pb-[17.5rem] lg:px-0 lg:pb-4">
         <h2 className="font-display text-3xl">Расчёт</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">Считает по кнопке и не пишется в книгу. Год — 365 дней.</p>
         <div className="mt-4 flex rounded-full bg-chip p-1">
@@ -153,10 +153,12 @@ export function CalcView() {
           </div>
         ) : null}
       </div>
-      <div className="px-4 pb-2 pt-4 lg:px-0">
-        <Keypad onKey={onKey} />
+      <div className="fixed inset-x-0 z-30 border-t border-line bg-desk px-4 py-3 lg:static lg:z-auto lg:border-0 lg:px-0" style={{ bottom: "calc(4rem + env(safe-area-inset-bottom))" }}>
+        <div className="mx-auto max-w-lg lg:max-w-none">
+          <Keypad onKey={onKey} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
