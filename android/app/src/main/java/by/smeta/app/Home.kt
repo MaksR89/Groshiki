@@ -89,6 +89,7 @@ private fun Shell(repo: Repo) {
         add(Nav("income", "Доходы", "arrow-up-right"))
         if (book.showCharges) add(Nav("charges", "Зарядки", "plug-zap"))
         if (book.showReport) add(Nav("report", "Отчёт", "pie-chart"))
+        if (book.showCalc) add(Nav("calc", "Расчёт", "calculator"))
         if (book.showReserve) add(Nav("other", "Другое", "lock"))
         add(Nav("book", "Книга", "menu"))
     }
@@ -111,7 +112,7 @@ private fun Shell(repo: Repo) {
                 }
                 if (book.showBalance && book.accounts.isNotEmpty()) MoneyText(totalBalance(book), color = Ink, size = 22.sp, font = Display, weight = FontWeight.SemiBold)
             }
-            val hideAdd = tab == "other" && !unlocked
+            val hideAdd = tab == "calc" || (tab == "other" && !unlocked)
             if (!hideAdd) {
                 val label = when {
                     tab == "charges" -> "Добавить зарядку"
@@ -150,6 +151,7 @@ private fun Shell(repo: Repo) {
                 tab == "income" -> FeedScreen(repo, "income") { composer = "income" to it }
                 tab == "charges" -> ChargesScreen(repo, chargeNew)
                 tab == "report" -> ReportScreen(repo) { composer = it.kind to it }
+                tab == "calc" -> CalcScreen()
                 tab == "other" -> if (unlocked) OtherScreen(repo, otherNew) { tab = "expenses" } else LockScreen(repo) { unlocked = true }
                 else -> BookScreen(repo, { sub = "accounts" }, { sub = "categories" })
             }

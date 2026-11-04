@@ -20,12 +20,14 @@ type LedgerState = Snapshot & {
   showBalance: boolean;
   showCharges: boolean;
   showReport: boolean;
+  showCalc: boolean;
   showReserve: boolean;
   reserveHash: string;
   currency: Currency;
   setShowBalance: (on: boolean) => void;
   setShowCharges: (on: boolean) => void;
   setShowReport: (on: boolean) => void;
+  setShowCalc: (on: boolean) => void;
   setShowReserve: (on: boolean) => void;
   setReserveHash: (hash: string) => void;
   setCurrency: (currency: Currency) => void;
@@ -87,12 +89,14 @@ export const useLedger = create<LedgerState>()(
       showBalance: false,
       showCharges: true,
       showReport: true,
+      showCalc: true,
       showReserve: false,
       reserveHash: "",
       currency: "BYN",
       setShowBalance: (on) => set({ showBalance: on }),
       setShowCharges: (on) => set({ showCharges: on }),
       setShowReport: (on) => set({ showReport: on }),
+      setShowCalc: (on) => set({ showCalc: on }),
       setShowReserve: (on) => set({ showReserve: on }),
       setReserveHash: (hash) => set({ reserveHash: hash }),
       setCurrency: (currency) => set({ currency }),
@@ -220,6 +224,7 @@ export const useLedger = create<LedgerState>()(
         showBalance: s.showBalance,
         showCharges: s.showCharges,
         showReport: s.showReport,
+        showCalc: s.showCalc,
         showReserve: s.showReserve,
         reserveHash: s.reserveHash,
         currency: s.currency,
@@ -291,6 +296,7 @@ function keepBook(raw: MirroredBook | undefined): {
   showBalance: boolean;
   showCharges: boolean;
   showReport: boolean;
+  showCalc: boolean;
   showReserve: boolean;
   reserveHash: string;
   currency: Currency;
@@ -311,6 +317,7 @@ function keepBook(raw: MirroredBook | undefined): {
     showBalance: book.showBalance === true,
     showCharges: book.showCharges !== false,
     showReport: book.showReport !== false,
+    showCalc: book.showCalc !== false,
     showReserve: book.showReserve === true,
     reserveHash: typeof book.reserveHash === "string" ? book.reserveHash : "",
     currency: book.currency === "USD" || book.currency === "EUR" || book.currency === "RUB" || book.currency === "BYN" ? book.currency : "BYN",
@@ -349,6 +356,7 @@ function pickBook(state: LedgerState): MirroredBook {
     showBalance: state.showBalance,
     showCharges: state.showCharges,
     showReport: state.showReport,
+    showCalc: state.showCalc,
     showReserve: state.showReserve,
     reserveHash: state.reserveHash,
     currency: state.currency,

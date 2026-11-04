@@ -5,6 +5,7 @@ internal val GLYPHS: Map<String, List<String>> = mapOf(
     "arrow-up-right" to listOf("M7 7h10v10", "M7 17 17 7"),
     "lock" to listOf("M 5 11 h 14 a 2 2 0 0 1 2 2 v 7 a 2 2 0 0 1 -2 2 h -14 a 2 2 0 0 1 -2 -2 v -7 a 2 2 0 0 1 2 -2 Z", "M7 11V7a5 5 0 0 1 10 0v4"),
     "menu" to listOf("M4 12h16", "M4 18h16", "M4 6h16"),
+    "calculator" to listOf("M 4 2 h 16 a 2 2 0 0 1 2 2 v 16 a 2 2 0 0 1 -2 2 h -16 a 2 2 0 0 1 -2 -2 v -16 a 2 2 0 0 1 2 -2 Z", "M 8 6 h 8", "M 8 14 h 0.01", "M 12 14 h 0.01", "M 16 14 h 0.01", "M 8 18 h 8"),
     "pie-chart" to listOf("M21 12c.552 0 1.005-.449.95-.998a10 10 0 0 0-8.953-8.951c-.55-.055-.998.398-.998.95v8a1 1 0 0 0 1 1z", "M21.21 15.89A10 10 0 1 1 8 2.83"),
     "plug-zap" to listOf("M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z", "m2 22 3-3", "M7.5 13.5 10 11", "M10.5 16.5 13 14", "m18 3-4 4h6l-4 4"),
     "plus" to listOf("M5 12h14", "M12 5v14"),

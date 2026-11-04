@@ -264,6 +264,8 @@ export function MoreView({
   const showReserve = useLedger((s) => s.showReserve);
   const showCharges = useLedger((s) => s.showCharges);
   const showReport = useLedger((s) => s.showReport);
+  const showCalc = useLedger((s) => s.showCalc);
+  const setShowCalc = useLedger((s) => s.setShowCalc);
   const reserveHash = useLedger((s) => s.reserveHash);
   const setShowReserve = useLedger((s) => s.setShowReserve);
   const setShowCharges = useLedger((s) => s.setShowCharges);
@@ -339,6 +341,7 @@ export function MoreView({
         <p className="px-1 pt-2 text-sm leading-relaxed text-muted">Расходы и доходы всегда в меню. Остальные разделы можно выключить.</p>
         <SwitchRow on={showCharges} label="Зарядки" onClick={() => setShowCharges(!showCharges)} />
         <SwitchRow on={showReport} label="Отчёт" onClick={() => setShowReport(!showReport)} />
+        <SwitchRow on={showCalc} label="Расчёт" onClick={() => setShowCalc(!showCalc)} />
         <SwitchRow
           on={showReserve}
           label="Другое"

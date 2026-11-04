@@ -454,6 +454,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
         Text("Расходы и доходы всегда в меню. Остальные разделы можно выключить.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 12.dp, start = 4.dp))
         SwitchRow("Зарядки", book.showCharges) { repo.update { it.copy(showCharges = !it.showCharges) } }
         SwitchRow("Отчёт", book.showReport) { repo.update { it.copy(showReport = !it.showReport) } }
+        SwitchRow("Расчёт", book.showCalc) { repo.update { it.copy(showCalc = !it.showCalc) } }
         SwitchRow("Другое", book.showReserve) {
             if (book.showReserve) repo.update { it.copy(showReserve = false) }
             else if (book.reserveHash.isEmpty()) pass = "create"
@@ -477,7 +478,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
                 Text("Отмена", color = Ink, modifier = Modifier.clickable { confirm = false }.padding(10.dp))
             }
         }
-        Text("Версия 1.5.3", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
+        Text("Версия 1.5.4", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
     }
     if (pass != null) Column(Modifier.fillMaxSize().background(Desk)) {
         LockBody(repo, if (pass == "create") "create" else "change", "Другое") { pass = null }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
+  Calculator,
   Lock,
   Menu,
   PieChart,
@@ -11,7 +12,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { cn } from "@/components/ledger/bits";
-import { ChargesView } from "@/components/ledger/charges";
+import { CalcView } from "@/components/ledger/calc";
 import { Composer } from "@/components/ledger/composer";
 import { Feed } from "@/components/ledger/feed";
 import { AccountsView, CategoriesView, MoreView } from "@/components/ledger/places";
@@ -23,13 +24,14 @@ import { totalBalance } from "@/lib/money/stats";
 import { bootLedger, useLedger } from "@/lib/money/store";
 import type { Entry, Kind } from "@/lib/money/types";
 
-type Tab = "expenses" | "income" | "charges" | "report" | "accounts" | "categories" | "more" | "other";
+type Tab = "expenses" | "income" | "charges" | "report" | "calc" | "accounts" | "categories" | "more" | "other";
 
 const NAV: { id: Tab; label: string; icon: typeof Wallet }[] = [
   { id: "expenses", label: "Расходы", icon: ArrowDownLeft },
   { id: "income", label: "Доходы", icon: ArrowUpRight },
   { id: "charges", label: "Зарядки", icon: PlugZap },
   { id: "report", label: "Отчёт", icon: PieChart },
+  { id: "calc", label: "Расчёт", icon: Calculator },
   { id: "accounts", label: "Счета", icon: Wallet },
   { id: "categories", label: "Статьи", icon: Shapes },
   { id: "more", label: "Книга", icon: Menu },
@@ -47,13 +49,14 @@ export function LedgerApp() {
   const [otherOpen, setOtherOpen] = useState(false);
   const showCharges = useLedger((s) => s.showCharges);
   const showReport = useLedger((s) => s.showReport);
+  const showCalc = useLedger((s) => s.showCalc);
   const showReserve = useLedger((s) => s.showReserve);
   const [showBalance] = useShowBalance();
 
   useEffect(() => {
     if (tab !== "other") setOtherOpen(false);
-    if ((tab === "charges" && !showCharges) || (tab === "report" && !showReport) || (tab === "other" && !showReserve)) setTab("expenses");
-  }, [tab, showCharges, showReport, showReserve]);
+    if ((tab === "charges" && !showCharges) || (tab === "report" && !showReport) || (tab === "calc" && !showCalc) || (tab === "other" && !showReserve)) setTab("expenses");
+  }, [tab, showCharges, showReport, showCalc, showReserve]);
 
   useEffect(() => {
     void bootLedger();
@@ -63,12 +66,14 @@ export function LedgerApp() {
     if (item.id === "accounts" || item.id === "categories") return false;
     if (item.id === "charges") return showCharges;
     if (item.id === "report") return showReport;
+    if (item.id === "calc") return showCalc;
     return true;
   });
   if (showReserve) phoneNav.splice(phoneNav.length - 1, 0, { id: "other", label: "Другое", icon: Lock });
   const sideNav = NAV.filter((item) => {
     if (item.id === "charges") return showCharges;
     if (item.id === "report") return showReport;
+    if (item.id === "calc") return showCalc;
     return true;
   });
   if (showReserve) {
@@ -123,7 +128,7 @@ export function LedgerApp() {
             {showBalance ? <div className="mt-4 font-display text-3xl tabular-nums"><Money cents={balance} /></div> : null}
             <div className="mt-1 text-sm text-muted">{accounts.length === 1 ? accounts[0].name : `${accounts.length} счетов`}</div>
           </div>
-          <button type="button" onClick={tab === "charges" ? () => setChargeDraft((n) => n + 1) : tab === "other" && otherOpen ? () => setOtherDraft((n) => n + 1) : openNew} className={cn("mt-5 flex h-11 items-center justify-center gap-2 rounded-full font-medium text-surface", tab === "charges" || tab === "other" ? "bg-ink" : "bg-expense", tab === "other" && !otherOpen && "hidden")}>
+          <button type="button" onClick={tab === "charges" ? () => setChargeDraft((n) => n + 1) : tab === "other" && otherOpen ? () => setOtherDraft((n) => n + 1) : openNew} className={cn("mt-5 flex h-11 items-center justify-center gap-2 rounded-full font-medium text-surface", tab === "charges" || tab === "other" ? "bg-ink" : "bg-expense", (tab === "calc" || (tab === "other" && !otherOpen)) && "hidden")}>
             <Plus className="size-4" /> {tab === "charges" ? "Новая зарядка" : tab === "other" ? "Добавить" : "Новая запись"}
           </button>
           <nav className="mt-6 grid gap-1">
@@ -160,7 +165,7 @@ export function LedgerApp() {
               className={cn(
                 "mt-2 flex h-10 w-full items-center justify-center gap-2 rounded-xl text-base font-medium text-surface",
                 tab === "charges" || tab === "other" ? "bg-ink" : addKind === "income" ? "bg-income" : "bg-expense",
-                tab === "other" && !otherOpen && "hidden",
+                (tab === "calc" || (tab === "other" && !otherOpen)) && "hidden",
               )}
             >
               <Plus className="size-4" />
@@ -173,6 +178,7 @@ export function LedgerApp() {
             {tab === "income" ? <Feed kind="income" onOpen={(entry) => setComposer({ kind: entry.kind, entry })} /> : null}
             {tab === "charges" ? <ChargesView draftKey={chargeDraft} /> : null}
             {tab === "report" ? <Report onOpen={(entry) => setComposer({ kind: entry.kind, entry })} /> : null}
+            {tab === "calc" ? <CalcView /> : null}
             {tab === "accounts" ? <AccountsView onBack={() => setTab("more")} /> : null}
             {tab === "categories" ? <CategoriesView onBack={() => setTab("more")} /> : null}
             {tab === "more" ? <MoreView onAccounts={() => setTab("accounts")} onCategories={() => setTab("categories")} /> : null}

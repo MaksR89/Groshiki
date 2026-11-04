@@ -44,6 +44,7 @@ data class Book(
     val showBalance: Boolean = false,
     val showCharges: Boolean = true,
     val showReport: Boolean = true,
+    val showCalc: Boolean = true,
     val showReserve: Boolean = false,
     val reserveHash: String = "",
     val currency: String = "BYN",
@@ -83,6 +84,7 @@ fun Book.toJson(): JSONObject = JSONObject().apply {
     put("showBalance", showBalance)
     put("showCharges", showCharges)
     put("showReport", showReport)
+    put("showCalc", showCalc)
     put("showReserve", showReserve)
     put("reserveHash", reserveHash)
     put("currency", currency)
@@ -109,6 +111,7 @@ fun bookFromJson(raw: JSONObject): Book {
         showBalance = root.optBoolean("showBalance", false),
         showCharges = if (root.has("showCharges")) root.optBoolean("showCharges") else true,
         showReport = if (root.has("showReport")) root.optBoolean("showReport") else true,
+        showCalc = if (root.has("showCalc")) root.optBoolean("showCalc") else true,
         showReserve = root.optBoolean("showReserve", false),
         reserveHash = root.optString("reserveHash", ""),
         currency = root.optString("currency", "BYN").let { if (it in setOf("BYN", "USD", "EUR", "RUB")) it else "BYN" },

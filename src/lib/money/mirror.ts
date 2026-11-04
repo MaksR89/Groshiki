@@ -13,6 +13,7 @@ export type MirroredBook = {
   showBalance?: boolean;
   showCharges?: boolean;
   showReport?: boolean;
+  showCalc?: boolean;
   showReserve?: boolean;
   reserveHash?: string;
   currency?: string;
