@@ -140,9 +140,18 @@ fun CalcScreen() {
             Row(Modifier.padding(top = 16.dp).fillMaxWidth().clip(CircleShape).background(Chip).padding(4.dp)) {
                 listOf("deposit" to "Депозит", "loan" to "Кредит").forEach { (id, label) ->
                     Box(Modifier.weight(1f).height(36.dp).clip(CircleShape).background(if (mode == id) Surface else Color.Transparent).clickable {
+                        if (id == mode) return@clickable
                         mode = id
-                        if (id == "loan" && unit == "day") unit = "month"
                         wipe()
+                        if (id == "loan") {
+                            amountRaw = ""
+                            rateRaw = ""
+                            termRaw = ""
+                            extraRaw = ""
+                            extraMonthsRaw = ""
+                            unit = "month"
+                            field = "amount"
+                        } else if (unit == "day") unit = "month"
                     }, contentAlignment = Alignment.Center) {
                         Text(label, color = if (mode == id) Ink else Muted, fontFamily = Body, fontSize = 14.sp, fontWeight = if (mode == id) FontWeight.Medium else FontWeight.Normal)
                     }

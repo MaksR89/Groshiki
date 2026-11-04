@@ -74,7 +74,20 @@ export function CalcView() {
         <p className="mt-2 text-sm leading-relaxed text-muted">Считает по кнопке и не пишется в книгу. Год — 365 дней.</p>
         <div className="mt-4 flex rounded-full bg-chip p-1">
           {([["deposit", "Депозит"], ["loan", "Кредит"]] as const).map(([id, label]) => (
-            <button key={id} type="button" onClick={() => { setMode(id); if (id === "loan" && unit === "day") setUnit("month"); wipe(); }} className={cn("h-9 flex-1 rounded-full text-sm", mode === id ? "bg-surface font-medium" : "text-muted")}>
+            <button key={id} type="button" onClick={() => {
+              if (id === mode) return;
+              setMode(id);
+              wipe();
+              if (id === "loan") {
+                setAmountRaw("");
+                setRateRaw("");
+                setTermRaw("");
+                setExtraRaw("");
+                setExtraMonthsRaw("");
+                setUnit("month");
+                setField("amount");
+              } else if (unit === "day") setUnit("month");
+            }} className={cn("h-9 flex-1 rounded-full text-sm", mode === id ? "bg-surface font-medium" : "text-muted")}>
               {label}
             </button>
           ))}

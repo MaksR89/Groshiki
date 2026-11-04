@@ -478,7 +478,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
                 Text("Отмена", color = Ink, modifier = Modifier.clickable { confirm = false }.padding(10.dp))
             }
         }
-        Text("Версия 1.5.6", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
+        Text("Версия 1.5.7", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
     }
     if (pass != null) Column(Modifier.fillMaxSize().background(Desk)) {
         LockBody(repo, if (pass == "create") "create" else "change", "Другое") { pass = null }
