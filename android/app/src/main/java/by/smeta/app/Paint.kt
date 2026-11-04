@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -110,7 +111,10 @@ fun ForeignSum(cents: Long, currency: String, size: TextUnit = 22.sp, color: Col
 @Composable
 fun Keypad(signed: Boolean = false, onKey: (String) -> Unit) {
     val keys = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "⌫")
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        Modifier.clickable(remember { MutableInteractionSource() }, null) {},
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
         if (signed) PadKey("±", Modifier.fillMaxWidth(), onKey)
         keys.chunked(3).forEach { row ->
             androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

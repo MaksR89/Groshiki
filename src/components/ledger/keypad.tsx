@@ -13,7 +13,7 @@ export function applyKey(raw: string, key: string): string {
 
 export function Keypad({ onKey, signed }: { onKey: (key: string) => void; signed?: boolean }) {
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-3 gap-2 touch-none">
       {signed ? (
         <button type="button" onClick={() => onKey("±")} className="col-span-3 flex h-11 items-center justify-center rounded-2xl bg-chip text-lg">
           ±

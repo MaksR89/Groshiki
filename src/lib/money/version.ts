@@ -1,9 +1,13 @@
-export const APP_VERSION = "1.5.8";
+export const APP_VERSION = "1.5.9";
 
 /** Версия формата книги. Увеличивать только вместе с migrate в store.ts. Ключ localStorage не менять. */
 export const DATA_VERSION = 1;
 
 export const CHANGELOG: { version: string; notes: string[] }[] = [
+  {
+    version: "1.5.9",
+    notes: ["Нажатие рядом с клавишей расчёта больше не снимает выбранное поле."],
+  },
   {
     version: "1.5.8",
     notes: ["Поля расчёта очищаются и при возврате с кредита на депозит."],
