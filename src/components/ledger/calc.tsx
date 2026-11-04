@@ -78,15 +78,13 @@ export function CalcView() {
               if (id === mode) return;
               setMode(id);
               wipe();
-              if (id === "loan") {
-                setAmountRaw("");
-                setRateRaw("");
-                setTermRaw("");
-                setExtraRaw("");
-                setExtraMonthsRaw("");
-                setUnit("month");
-                setField("amount");
-              } else if (unit === "day") setUnit("month");
+              setAmountRaw("");
+              setRateRaw("");
+              setTermRaw("");
+              setExtraRaw("");
+              setExtraMonthsRaw("");
+              setUnit("month");
+              setField("amount");
             }} className={cn("h-9 flex-1 rounded-full text-sm", mode === id ? "bg-surface font-medium" : "text-muted")}>
               {label}
             </button>

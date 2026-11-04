@@ -143,15 +143,13 @@ fun CalcScreen() {
                         if (id == mode) return@clickable
                         mode = id
                         wipe()
-                        if (id == "loan") {
-                            amountRaw = ""
-                            rateRaw = ""
-                            termRaw = ""
-                            extraRaw = ""
-                            extraMonthsRaw = ""
-                            unit = "month"
-                            field = "amount"
-                        } else if (unit == "day") unit = "month"
+                        amountRaw = ""
+                        rateRaw = ""
+                        termRaw = ""
+                        extraRaw = ""
+                        extraMonthsRaw = ""
+                        unit = "month"
+                        field = "amount"
                     }, contentAlignment = Alignment.Center) {
                         Text(label, color = if (mode == id) Ink else Muted, fontFamily = Body, fontSize = 14.sp, fontWeight = if (mode == id) FontWeight.Medium else FontWeight.Normal)
                     }
