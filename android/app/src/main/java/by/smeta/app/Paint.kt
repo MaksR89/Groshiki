@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -139,11 +140,14 @@ fun AmountButton(raw: String, active: Boolean, placeholder: String, onPress: () 
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
-        androidx.compose.foundation.layout.Row(verticalAlignment = Alignment.CenterVertically) {
-            if (active && shown.isEmpty()) Box(Modifier.padding(end = 4.dp).size(width = 2.dp, height = 28.dp).background(Ink))
-            if (shown.isEmpty()) Text(placeholder, color = Ink.copy(alpha = 0.25f), fontFamily = Body, fontSize = 20.sp)
-            else Text(shown, color = Ink, fontFamily = Display, fontSize = 24.sp)
-            if (active && shown.isNotEmpty()) Box(Modifier.padding(start = 2.dp).size(width = 2.dp, height = 28.dp).background(Ink))
+        if (shown.isEmpty()) {
+            Text(placeholder, color = Ink.copy(alpha = 0.25f), fontFamily = Body, fontSize = 20.sp)
+            if (active) Box(Modifier.align(Alignment.CenterStart).size(width = 2.dp, height = 28.dp).background(Ink))
+        } else {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(shown, color = Ink, fontFamily = Display, fontSize = 24.sp)
+                if (active) Box(Modifier.padding(start = 2.dp).size(width = 2.dp, height = 28.dp).background(Ink))
+            }
         }
     }
 }

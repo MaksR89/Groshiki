@@ -50,16 +50,16 @@ export function AmountButton({
       type="button"
       onClick={onPress}
       className={cn(
-        "mt-1 flex h-12 w-full items-center rounded-xl border bg-surface px-3 text-left",
+        "relative mt-1 flex h-12 w-full items-center rounded-xl border bg-surface px-3 text-left",
         active ? "border-2 border-ink ring-2 ring-ink/25" : "border-line",
       )}
     >
-      {active && !shown ? <span className="smeta-caret mr-1 inline-block h-7 w-0.5 shrink-0 bg-ink" /> : null}
       {shown ? (
         <span className="font-display text-2xl">{shown}</span>
       ) : (
-        <span className="font-sans text-xl font-normal text-ink/25">{placeholder}</span>
+        <span className="pointer-events-none font-sans text-xl font-normal text-ink/25">{placeholder}</span>
       )}
+      {active && !shown ? <span className="smeta-caret absolute left-3 top-1/2 h-7 w-0.5 -translate-y-1/2 bg-ink" /> : null}
       {active && shown ? <span className="smeta-caret ml-0.5 inline-block h-7 w-0.5 shrink-0 bg-ink" /> : null}
     </button>
   );

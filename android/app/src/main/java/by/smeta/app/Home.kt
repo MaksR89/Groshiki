@@ -240,8 +240,10 @@ private fun FeedScreen(repo: Repo, kind: String, onOpen: (Entry) -> Unit) {
                 cursorBrush = caret,
                 modifier = Modifier.padding(start = 8.dp).fillMaxWidth(),
                 decorationBox = { inner ->
-                    if (query.isEmpty()) Text("Статья или заметка", color = Muted, fontFamily = Body, fontSize = 16.sp)
-                    inner()
+                    Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                        if (query.isEmpty()) Text("Статья или заметка", color = Muted, fontFamily = Body, fontSize = 16.sp)
+                        inner()
+                    }
                 },
             )
         }
@@ -362,8 +364,10 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
                 Picker(time, Modifier.weight(1f)) { pickTime(context, time) { time = it } }
             }
             BasicTextField(note, { note = it.take(200) }, textStyle = fieldStyle(), cursorBrush = caret, modifier = Modifier.padding(top = 8.dp).fillMaxWidth().height(44.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).padding(horizontal = 12.dp, vertical = 10.dp), decorationBox = { inner ->
-                if (note.isEmpty()) Text("Заметка", color = Muted, fontFamily = Body)
-                inner()
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                    if (note.isEmpty()) Text("Заметка", color = Muted, fontFamily = Body)
+                    inner()
+                }
             })
             if (book.accounts.size > 1) {
                 Text(if (kind == "transfer") "Откуда" else "Счёт", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))

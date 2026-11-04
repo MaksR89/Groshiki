@@ -478,7 +478,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
                 Text("Отмена", color = Ink, modifier = Modifier.clickable { confirm = false }.padding(10.dp))
             }
         }
-        Text("Версия 1.5.4", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
+        Text("Версия 1.5.5", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
     }
     if (pass != null) Column(Modifier.fillMaxSize().background(Desk)) {
         LockBody(repo, if (pass == "create") "create" else "change", "Другое") { pass = null }
@@ -647,8 +647,10 @@ fun IconGrid(icon: String, tint: Color, onPick: (String) -> Unit) {
 @Composable
 fun Field(value: String, onChange: (String) -> Unit, placeholder: String) {
     BasicTextField(value, onChange, textStyle = fieldStyle(), cursorBrush = caret, modifier = Modifier.padding(top = 8.dp).fillMaxWidth().height(44.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).background(Surface, RoundedCornerShape(12.dp)).padding(12.dp), decorationBox = { inner ->
-        if (value.isEmpty()) Text(placeholder, color = Muted, fontFamily = Body)
-        inner()
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+            if (value.isEmpty()) Text(placeholder, color = Muted, fontFamily = Body)
+            inner()
+        }
     })
 }
 
