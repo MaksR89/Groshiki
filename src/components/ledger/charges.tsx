@@ -131,7 +131,7 @@ export function ChargesView({ draftKey }: { draftKey: number }) {
   );
 }
 
-function StationMark({ station, className }: { station: Station; className?: string }) {
+export function StationMark({ station, className }: { station: Station; className?: string }) {
   if (station.logo) {
     return <img src={station.logo} alt="" className={className ?? "size-16 rounded-xl object-cover"} />;
   }
@@ -215,7 +215,7 @@ function StationDialog({ station, onClose }: { station: Station; onClose: () => 
   );
 }
 
-function ChargeDialog({ charge, onClose }: { charge: Charge | null; onClose: () => void }) {
+export function ChargeDialog({ charge, onClose }: { charge: Charge | null; onClose: () => void }) {
   const stations = useLedger((s) => s.stations);
   const addCharge = useLedger((s) => s.addCharge);
   const updateCharge = useLedger((s) => s.updateCharge);

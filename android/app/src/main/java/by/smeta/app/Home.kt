@@ -82,6 +82,7 @@ private fun Shell(repo: Repo) {
     var sub by remember { mutableStateOf<String?>(null) }
     var composer by remember { mutableStateOf<Pair<String, Entry?>?>(null) }
     var chargeNew by remember { mutableStateOf(0) }
+    var chargeEdit by remember { mutableStateOf<Charge?>(null) }
     var otherNew by remember { mutableStateOf(0) }
     var unlocked by remember { mutableStateOf(false) }
     val tabs = buildList {
@@ -110,7 +111,23 @@ private fun Shell(repo: Repo) {
                         color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp),
                     )
                 }
-                if (book.showBalance && book.accounts.isNotEmpty()) MoneyText(totalBalance(book), color = Ink, size = 22.sp, font = Display, weight = FontWeight.SemiBold)
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        when {
+                            sub == "accounts" -> "Счета"
+                            sub == "categories" -> "Статьи"
+                            tab == "income" -> "Доходы"
+                            tab == "charges" -> "Зарядки"
+                            tab == "report" -> "Отчёт"
+                            tab == "calc" -> "Расчёт"
+                            tab == "other" -> "Другое"
+                            tab == "book" -> "Книга"
+                            else -> "Расходы"
+                        },
+                        color = Ink, fontFamily = Body, fontSize = 16.sp, fontWeight = FontWeight.Medium,
+                    )
+                    if (book.showBalance && book.accounts.isNotEmpty()) MoneyText(totalBalance(book), color = Ink, size = 22.sp, font = Display, weight = FontWeight.SemiBold, modifier = Modifier.padding(top = 4.dp))
+                }
             }
             val hideAdd = tab == "calc" || (tab == "other" && !unlocked)
             if (!hideAdd) {
@@ -147,8 +164,8 @@ private fun Shell(repo: Repo) {
             when {
                 sub == "accounts" -> AccountsScreen(repo) { sub = null }
                 sub == "categories" -> CategoriesScreen(repo) { sub = null }
-                tab == "expenses" -> FeedScreen(repo, "expense") { composer = "expense" to it }
-                tab == "income" -> FeedScreen(repo, "income") { composer = "income" to it }
+                tab == "expenses" -> FeedScreen(repo, "expense", onOpen = { composer = "expense" to it }, onCharge = { chargeEdit = it })
+                tab == "income" -> FeedScreen(repo, "income", onOpen = { composer = "income" to it })
                 tab == "charges" -> ChargesScreen(repo, chargeNew)
                 tab == "report" -> ReportScreen(repo) { composer = it.kind to it }
                 tab == "calc" -> CalcScreen()
@@ -177,11 +194,12 @@ private fun Shell(repo: Repo) {
     composer?.let { (initial, editing) ->
         ComposerSheet(repo, initial, editing) { composer = null }
     }
+    chargeEdit?.let { ChargeSheet(repo, it) { chargeEdit = null } }
     }
 }
 
 @Composable
-private fun FeedScreen(repo: Repo, kind: String, onOpen: (Entry) -> Unit) {
+private fun FeedScreen(repo: Repo, kind: String, onOpen: (Entry) -> Unit, onCharge: (Charge) -> Unit = {}) {
     val book = repo.book
     var mode by remember { mutableStateOf("recent") }
     var month by remember { mutableStateOf(todayKey()) }
@@ -190,11 +208,11 @@ private fun FeedScreen(repo: Repo, kind: String, onOpen: (Entry) -> Unit) {
     var limit by remember { mutableStateOf(40) }
     val today = todayKey()
     val yesterday = addDays(today, -1)
-    val todaySum = sumKind(book.entries, kind, today, today, accountId)
-    val ySum = sumKind(book.entries, kind, yesterday, yesterday, accountId)
+    val todaySum = sumKind(book.entries, kind, today, today, accountId) + if (kind == "expense") chargeSpend(book.charges, today, today, accountId) else 0
+    val ySum = sumKind(book.entries, kind, yesterday, yesterday, accountId) + if (kind == "expense") chargeSpend(book.charges, yesterday, yesterday, accountId) else 0
     val shownMonth = if (mode == "month" && query.isBlank()) month else today
     val (from, to) = monthRange(shownMonth)
-    val monthSum = sumKind(book.entries, kind, from, to, accountId)
+    val monthSum = sumKind(book.entries, kind, from, to, accountId) + if (kind == "expense") chargeSpend(book.charges, from, to, accountId) else 0
     val monthLabel = if (shownMonth.take(7) == today.take(7)) "В этом месяце" else monthTitle(shownMonth)
     val pool = book.entries.filter { e ->
         if (e.kind != kind && e.kind != "transfer") return@filter false
@@ -204,7 +222,14 @@ private fun FeedScreen(repo: Repo, kind: String, onOpen: (Entry) -> Unit) {
         val cat = book.categories.find { it.id == e.categoryId }
         "${cat?.name.orEmpty()} ${cat?.group.orEmpty()} ${e.note}".contains(query.trim(), true)
     }.asReversed()
-    val visible = pool.take(limit)
+    val chargePool = if (kind == "expense" && accountId == "all") book.charges.filter { c ->
+        if (query.isBlank() && mode == "month" && !c.at.startsWith(month.take(7))) return@filter false
+        if (query.isBlank()) return@filter true
+        val station = book.stations.find { it.id == c.stationId }
+        "${station?.name.orEmpty()} зарядка".contains(query.trim(), true)
+    } else emptyList()
+    val lines = (pool.map { FeedLine(it.at, it, null) } + chargePool.map { FeedLine(it.at, null, it) }).sortedByDescending { it.at }
+    val visibleLines = lines.take(limit)
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 16.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Summary("Сегодня", todaySum, Modifier.weight(1f))
@@ -247,12 +272,12 @@ private fun FeedScreen(repo: Repo, kind: String, onOpen: (Entry) -> Unit) {
                 },
             )
         }
-        if (visible.isEmpty()) {
+        if (visibleLines.isEmpty()) {
             Text(if (query.isNotBlank()) "Ничего не нашлось." else if (kind == "expense") "Расходов здесь нет." else "Доходов здесь нет.", color = Muted, fontFamily = Body, modifier = Modifier.padding(top = 40.dp).fillMaxWidth(), textAlign = TextAlign.Center)
         } else {
-            DayList(visible, book, onOpen)
-            if (pool.size > visible.size) {
-                Text("Ещё ${minOf(40, pool.size - visible.size)}", color = Ink, fontFamily = Body, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 16.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Surface).clickable { limit += 40 }.padding(vertical = 12.dp))
+            if (kind == "expense") MixedDays(visibleLines, book, onOpen, onCharge) else DayList(pool.take(limit), book, onOpen)
+            if (lines.size > visibleLines.size) {
+                Text("Ещё ${minOf(40, lines.size - visibleLines.size)}", color = Ink, fontFamily = Body, fontWeight = FontWeight.Medium, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 16.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Surface).clickable { limit += 40 }.padding(vertical = 12.dp))
             }
         }
         Spacer(Modifier.height(16.dp))
@@ -284,6 +309,53 @@ private fun RoundBtn(label: String, enabled: Boolean = true, click: () -> Unit) 
 @Composable
 private fun ChipBtn(label: String, on: Boolean, click: () -> Unit) {
     Text(label, color = if (on) Surface else Ink, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.clip(CircleShape).background(if (on) Ink else Surface).clickable(onClick = click).padding(horizontal = 12.dp, vertical = 8.dp))
+}
+
+private data class FeedLine(val at: String, val entry: Entry?, val charge: Charge?)
+
+@Composable
+private fun MixedDays(lines: List<FeedLine>, book: Book, onOpen: (Entry) -> Unit, onCharge: (Charge) -> Unit) {
+    lines.groupBy { it.at.take(10) }.forEach { (day, list) ->
+        Text(dayLabel(day), color = Muted, fontFamily = Body, fontSize = 14.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(top = 20.dp))
+        list.forEach { line ->
+            val entry = line.entry
+            val charge = line.charge
+            if (entry != null) {
+                val cat = book.categories.find { it.id == entry.categoryId }
+                val title = if (entry.kind == "transfer") "Перевод → ${book.accounts.find { it.id == entry.toAccountId }?.name ?: "счёт"}" else cat?.name ?: "Без статьи"
+                val meta = buildList {
+                    if (entry.kind != "transfer" && !cat?.group.isNullOrBlank()) add(cat!!.group)
+                    if (entry.note.isNotBlank()) add(entry.note)
+                    val time = entry.at.drop(11).take(5)
+                    if (time.isNotBlank() && time != "00:00") add(time)
+                }.joinToString(" · ")
+                Row(Modifier.fillMaxWidth().clickable { onOpen(entry) }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(44.dp).clip(CircleShape).background(Chip), contentAlignment = Alignment.Center) {
+                        LineIcon(if (entry.kind == "transfer") "repeat" else cat?.icon ?: "ellipsis", tint = if (cat != null) parseHex(cat.color) else Muted, size = 20.dp)
+                    }
+                    Column(Modifier.padding(start = 12.dp).weight(1f)) {
+                        Text(title, color = Ink, fontFamily = Body, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        if (meta.isNotBlank()) Text(meta, color = Muted, fontFamily = Body, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                    MoneyText(entry.amount, color = if (entry.kind == "income") Income else Ink, weight = FontWeight.Medium)
+                }
+            } else if (charge != null) {
+                val station = book.stations.find { it.id == charge.stationId }
+                val time = charge.at.drop(11).take(5)
+                Row(Modifier.fillMaxWidth().clickable { onCharge(charge) }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Box(Modifier.size(44.dp).clip(CircleShape).background(Chip), contentAlignment = Alignment.Center) {
+                        if (station != null) StationMark(station, 28.dp) else LineIcon("plug-zap", size = 20.dp)
+                    }
+                    Column(Modifier.padding(start = 12.dp).weight(1f)) {
+                        Text(station?.name ?: "Зарядка", color = Ink, fontFamily = Body, fontWeight = FontWeight.Medium, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                        Text("Зарядка · ${formatKwh(charge.kwh)} кВт·ч${if (time.isNotBlank() && time != "00:00") " · $time" else ""}", color = Muted, fontFamily = Body, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    }
+                    MoneyText(charge.price, weight = FontWeight.Medium)
+                }
+            }
+            Box(Modifier.fillMaxWidth().height(1.dp).background(Line))
+        }
+    }
 }
 
 @Composable
@@ -320,7 +392,7 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
     val book = repo.book
     var kind by remember { mutableStateOf(editing?.kind ?: initial) }
     var raw by remember { mutableStateOf(if (editing == null) "" else centsToInput(editing.amount)) }
-    var categoryId by remember { mutableStateOf(editing?.categoryId ?: if (initial == "transfer") null else if (initial == "income") book.lastCategory.income else book.lastCategory.expense) }
+    var categoryId by remember { mutableStateOf(editing?.categoryId) }
     var accountId by remember { mutableStateOf(editing?.accountId ?: book.accounts.firstOrNull()?.id ?: "") }
     var toId by remember { mutableStateOf(editing?.toAccountId ?: book.accounts.getOrNull(1)?.id ?: "") }
     var note by remember { mutableStateOf(editing?.note ?: "") }
@@ -348,10 +420,7 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
                         kind = id
                         if (id != "transfer") {
                             val cat = book.categories.find { it.id == categoryId }
-                            if (cat == null || (cat.kind != "both" && cat.kind != id)) {
-                                val last = if (id == "income") book.lastCategory.income else book.lastCategory.expense
-                                categoryId = last?.takeIf { idLast -> book.categories.any { it.id == idLast && (it.kind == id || it.kind == "both") } }
-                            }
+                            if (cat == null || (cat.kind != "both" && cat.kind != id)) categoryId = null
                         }
                     }, contentAlignment = Alignment.Center) {
                         Text(label, color = if (!enabled) Muted else if (kind == id) Ink else Muted, fontFamily = Body, fontSize = 14.sp, fontWeight = if (kind == id) FontWeight.Medium else FontWeight.Normal)

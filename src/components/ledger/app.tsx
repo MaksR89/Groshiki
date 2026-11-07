@@ -157,7 +157,12 @@ export function LedgerApp() {
                 <div className="font-display text-2xl leading-none">Грошыки</div>
                 <div className="mt-1 text-sm text-muted">{accounts[0]?.name ?? "Нет счетов"}</div>
               </div>
-              {showBalance ? <div className="font-display text-xl tabular-nums"><Money cents={balance} /></div> : null}
+              <div className="text-right">
+                <div className="text-base font-medium">
+                  {tab === "income" ? "Доходы" : tab === "charges" ? "Зарядки" : tab === "report" ? "Отчёт" : tab === "calc" ? "Расчёт" : tab === "other" ? "Другое" : tab === "accounts" ? "Счета" : tab === "categories" ? "Статьи" : tab === "more" ? "Книга" : "Расходы"}
+                </div>
+                {showBalance ? <div className="mt-1 font-display text-xl tabular-nums"><Money cents={balance} /></div> : null}
+              </div>
             </div>
             <button
               type="button"

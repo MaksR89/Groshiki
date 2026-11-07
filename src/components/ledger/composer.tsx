@@ -22,7 +22,6 @@ export function Composer({
   const accounts = useLedger((s) => s.accounts);
   const categories = useLedger((s) => s.categories);
   const entries = useLedger((s) => s.entries);
-  const lastCategory = useLedger((s) => s.lastCategory);
   const addEntry = useLedger((s) => s.addEntry);
   const updateEntry = useLedger((s) => s.updateEntry);
   const removeEntry = useLedger((s) => s.removeEntry);
@@ -30,11 +29,7 @@ export function Composer({
 
   const [kind, setKind] = useState<Kind>(editing?.kind ?? initialKind);
   const [raw, setRaw] = useState(editing ? centsToInput(editing.amount) : "");
-  const [categoryId, setCategoryId] = useState<string | null>(() => {
-    if (editing) return editing.categoryId;
-    if (initialKind === "transfer") return null;
-    return lastCategory[initialKind];
-  });
+  const [categoryId, setCategoryId] = useState<string | null>(editing ? editing.categoryId : null);
   const [accountId, setAccountId] = useState(editing?.accountId ?? accounts[0]?.id ?? "");
   const [toAccountId, setToAccountId] = useState(editing?.toAccountId ?? accounts[1]?.id ?? "");
   const [note, setNote] = useState(editing?.note ?? "");
@@ -101,11 +96,7 @@ export function Composer({
     setKind(next);
     if (next === "transfer") return;
     const cat = categories.find((c) => c.id === categoryId);
-    if (!cat || (cat.kind !== "both" && cat.kind !== next)) {
-      const last = lastCategory[next];
-      const lastOk = last && categories.some((c) => c.id === last && (c.kind === next || c.kind === "both"));
-      setCategoryId(lastOk ? last : null);
-    }
+    if (!cat || (cat.kind !== "both" && cat.kind !== next)) setCategoryId(null);
   }
 
   function createCategory() {

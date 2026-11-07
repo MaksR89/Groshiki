@@ -139,7 +139,7 @@ private fun StationSheet(repo: Repo, station: Station, onClose: () -> Unit) {
 }
 
 @Composable
-private fun ChargeSheet(repo: Repo, charge: Charge?, onClose: () -> Unit) {
+fun ChargeSheet(repo: Repo, charge: Charge?, onClose: () -> Unit) {
     val book = repo.book
     val context = LocalContext.current
     var stationId by remember { mutableStateOf(charge?.stationId ?: book.stations.firstOrNull()?.id ?: "") }
@@ -231,7 +231,7 @@ fun ReportScreen(repo: Repo, onOpen: (Entry) -> Unit) {
     }
     val from = fromTo.first
     val to = fromTo.second
-    val spent = sumKind(book.entries, "expense", from, to, accountId)
+    val spent = sumKind(book.entries, "expense", from, to, accountId) + chargeSpend(book.charges, from, to, accountId)
     val earned = sumKind(book.entries, "income", from, to, accountId)
     val periodCharges = book.charges.filter { val d = it.at.take(10); d >= from && d <= to }
     val chargeKwh = periodCharges.sumOf { it.kwh }
@@ -248,8 +248,13 @@ fun ReportScreen(repo: Repo, onOpen: (Entry) -> Unit) {
             .groupBy { it.categoryId!! }.map { (id, list) ->
                 val cat = book.categories.find { it.id == id }
                 Slice(id, cat?.name ?: "Без статьи", list.sumOf { it.amount }, 0, cat?.color ?: "#6f675e", "")
-            }.sortedByDescending { it.value }
-        if (rows.size <= 8) rows else rows.take(8) + Slice("__rest", "Остальные", rows.drop(8).sumOf { it.value }, 0, "#6f675e", "")
+            }.toMutableList()
+        if (kind == "expense") {
+            val charging = chargeSpend(book.charges, from, to, accountId)
+            if (charging > 0) rows.add(Slice("charge", "Зарядка", charging, chargeKwh, "#3c6e4a", ""))
+        }
+        val sorted = rows.sortedByDescending { it.value }
+        if (sorted.size <= 8) sorted else sorted.take(8) + Slice("__rest", "Остальные", sorted.drop(8).sumOf { it.value }, 0, "#6f675e", "")
     }
     val title = when (mode) {
         "day" -> anchor.take(10).split("-").reversed().joinToString(".")
@@ -299,8 +304,9 @@ fun ReportScreen(repo: Repo, onOpen: (Entry) -> Unit) {
         if (drillId != null) {
             Text("← К диаграмме", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 16.dp).clickable { drill = null })
             Text(slices.find { it.id == drillId }?.name ?: "Статья", color = Ink, fontFamily = Display, fontSize = 24.sp, modifier = Modifier.padding(top = 8.dp))
-            if (kind == "charge") {
-                periodCharges.filter { it.stationId == drillId }.sortedByDescending { it.at }.forEach { row ->
+            if (kind == "charge" || drillId == "charge") {
+                val shown = if (kind == "charge") periodCharges.filter { it.stationId == drillId } else periodCharges
+                shown.sortedByDescending { it.at }.forEach { row ->
                     Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Surface).padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column { Text(row.at.take(10).split("-").reversed().joinToString("."), color = Muted, fontSize = 14.sp, fontFamily = Body); Text("${formatKwh(row.kwh)} кВт·ч", color = Ink, fontFamily = Body) }
                         MoneyText(row.price)
@@ -363,6 +369,7 @@ private fun YearBars(book: Book, kind: String, year: Int, accountId: String) {
     val values = LongArray(12)
     if (kind == "charge") book.charges.filter { it.at.startsWith(year.toString()) }.forEach { values[it.at.substring(5, 7).toInt() - 1] += it.price }
     else book.entries.filter { it.kind == kind && it.at.startsWith(year.toString()) && (accountId == "all" || it.accountId == accountId) }.forEach { values[it.at.substring(5, 7).toInt() - 1] += it.amount }
+    if (kind == "expense" && accountId == "all") book.charges.filter { it.at.startsWith(year.toString()) }.forEach { values[it.at.substring(5, 7).toInt() - 1] += it.price }
     val max = values.maxOrNull()?.coerceAtLeast(1) ?: 1
     val color = if (kind == "charge") Color(0xFF1A6FD4) else if (kind == "income") Income else Expense
     Row(Modifier.padding(top = 8.dp).fillMaxWidth().height(120.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.Bottom) {
@@ -478,7 +485,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
                 Text("Отмена", color = Ink, modifier = Modifier.clickable { confirm = false }.padding(10.dp))
             }
         }
-        Text("Версия 1.5.9", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
+        Text("Версия 1.5.10", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
     }
     if (pass != null) Column(Modifier.fillMaxSize().background(Desk)) {
         LockBody(repo, if (pass == "create") "create" else "change", "Другое") { pass = null }

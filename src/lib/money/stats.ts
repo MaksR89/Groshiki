@@ -1,5 +1,5 @@
 import { inclusiveDays, monthRange, yearRange } from "@/lib/money/dates";
-import type { Account, Entry, Kind } from "@/lib/money/types";
+import type { Account, Charge, Entry, Kind } from "@/lib/money/types";
 
 export type PeriodMode = "day" | "month" | "year";
 
@@ -48,6 +48,17 @@ export function sumKind(
     if (day < from || day > to) continue;
     if (accountId !== "all" && e.accountId !== accountId) continue;
     n += e.amount;
+  }
+  return n;
+}
+
+export function chargeSpend(charges: Charge[], from: string, to: string, accountId: string): number {
+  if (accountId !== "all") return 0;
+  let n = 0;
+  for (const c of charges) {
+    const day = c.at.slice(0, 10);
+    if (day < from || day > to) continue;
+    n += c.price;
   }
   return n;
 }

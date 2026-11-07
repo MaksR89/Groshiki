@@ -133,3 +133,14 @@ fun sumKind(entries: List<Entry>, kind: String, from: String, to: String, accoun
     }
     return n
 }
+
+fun chargeSpend(charges: List<Charge>, from: String, to: String, accountId: String): Long {
+    if (accountId != "all") return 0
+    var n = 0L
+    for (c in charges) {
+        val day = c.at.take(10)
+        if (day < from || day > to) continue
+        n += c.price
+    }
+    return n
+}

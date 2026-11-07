@@ -5,7 +5,7 @@ import { DayGroups, cn } from "@/components/ledger/bits";
 import { MONTHS_SHORT, addDays, addMonths, monthTitle, parts, todayKey, yearTitle } from "@/lib/money/dates";
 import { Money } from "@/components/ledger/byn";
 import { formatKwh } from "@/lib/money/format";
-import { averageDivisor, byCategory, monthsOfYear, periodBounds, sumKind, type PeriodMode } from "@/lib/money/stats";
+import { chargeSpend, averageDivisor, byCategory, monthsOfYear, periodBounds, sumKind, type PeriodMode } from "@/lib/money/stats";
 import { useLedger } from "@/lib/money/store";
 import type { Entry } from "@/lib/money/types";
 
@@ -25,15 +25,15 @@ export function Report({ onOpen }: { onOpen: (entry: Entry) => void }) {
   const [drill, setDrill] = useState<string | null>(null);
 
   const { from, to } = periodBounds(mode, anchor);
-  const spent = sumKind(entries, "expense", from, to, accountId);
-  const earned = sumKind(entries, "income", from, to, accountId);
-  const kind = kindChoice ?? (earned > spent ? "income" : "expense");
   const periodCharges = useMemo(
     () => charges.filter((c) => { const day = c.at.slice(0, 10); return day >= from && day <= to; }),
     [charges, from, to],
   );
   const chargeKwh = periodCharges.reduce((sum, c) => sum + c.kwh, 0);
   const chargeCost = periodCharges.reduce((sum, c) => sum + c.price, 0);
+  const spent = sumKind(entries, "expense", from, to, accountId) + chargeSpend(charges, from, to, accountId);
+  const earned = sumKind(entries, "income", from, to, accountId);
+  const kind = kindChoice ?? (earned > spent ? "income" : "expense");
   const stationById = useMemo(() => new Map(stations.map((s) => [s.id, s])), [stations]);
   const total = kind === "charge" ? chargeCost : kind === "income" ? earned : spent;
   const days = averageDivisor(mode, from, to, today);
@@ -63,11 +63,16 @@ export function Report({ onOpen }: { onOpen: (entry: Entry) => void }) {
         return { id, name: cat?.name ?? "Без статьи", value, kwh: 0, color: cat?.color ?? "var(--color-muted)", logo: "" };
       })
       .sort((a, b) => b.value - a.value);
+    if (kind === "expense") {
+      const charging = chargeSpend(charges, from, to, accountId);
+      if (charging > 0) rows.push({ id: "charge", name: "Зарядка", value: charging, kwh: chargeKwh, color: "#3c6e4a", logo: "" });
+      rows.sort((a, b) => b.value - a.value);
+    }
     if (rows.length <= TOP) return rows;
     const head = rows.slice(0, TOP);
     const rest = rows.slice(TOP).reduce((s, r) => s + r.value, 0);
     return [...head, { id: "__rest", name: "Остальные", value: rest, kwh: 0, color: "var(--color-muted)", logo: "" }];
-  }, [entries, kind, from, to, accountId, catById, periodCharges, stationById]);
+  }, [entries, kind, from, to, accountId, catById, periodCharges, stationById, charges, chargeKwh]);
 
   const year = parts(anchor).y;
   const bars = useMemo(() => {
@@ -80,10 +85,12 @@ export function Report({ onOpen }: { onOpen: (entry: Entry) => void }) {
       }
       return buckets.map((value, i) => ({ name: MONTHS_SHORT[i], value }));
     }
-    return monthsOfYear(entries, kind, year, accountId).map((value, i) => ({
-      name: MONTHS_SHORT[i],
-      value,
-    }));
+    return monthsOfYear(entries, kind, year, accountId).map((value, i) => {
+      const extra = kind === "expense" && accountId === "all"
+        ? charges.filter((c) => c.at.startsWith(`${year}-${String(i + 1).padStart(2, "0")}`)).reduce((s, c) => s + c.price, 0)
+        : 0;
+      return { name: MONTHS_SHORT[i], value: value + extra };
+    });
   }, [mode, entries, kind, year, accountId, charges]);
 
   const atEnd =
@@ -122,8 +129,10 @@ export function Report({ onOpen }: { onOpen: (entry: Entry) => void }) {
   }, [drill, entries, kind, from, to, accountId]);
 
   const drilledCharges = useMemo(() => {
-    if (!drill || kind !== "charge") return [];
-    return periodCharges.filter((c) => c.stationId === drill).slice().sort((a, b) => (a.at < b.at ? 1 : -1));
+    if (!drill) return [];
+    if (kind === "charge") return periodCharges.filter((c) => c.stationId === drill).slice().sort((a, b) => (a.at < b.at ? 1 : -1));
+    if (kind === "expense" && drill === "charge") return periodCharges.slice().sort((a, b) => (a.at < b.at ? 1 : -1));
+    return [];
   }, [drill, kind, periodCharges]);
 
   return (
@@ -196,7 +205,7 @@ export function Report({ onOpen }: { onOpen: (entry: Entry) => void }) {
         <div className="mt-4">
           <button type="button" onClick={() => setDrill(null)} className="text-sm text-muted">← К диаграмме</button>
           <h3 className="mt-2 font-display text-2xl">{slices.find((s) => s.id === drill)?.name ?? (kind === "charge" ? "Станция" : "Статья")}</h3>
-          {kind === "charge" ? (
+          {kind === "charge" || drill === "charge" ? (
             <ul className="mt-3 grid gap-2">
               {drilledCharges.map((row) => (
                 <li key={row.id} className="flex items-center justify-between rounded-2xl bg-surface px-3 py-3">
