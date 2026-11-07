@@ -153,7 +153,7 @@ export function LedgerApp() {
 
         <div className="min-w-0 flex-1">
           <header className="sticky top-0 z-20 border-b border-line bg-desk px-4 py-3 lg:hidden">
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-end justify-between gap-3">
               <div className="font-display text-2xl leading-none">Грошыки</div>
               <div className="truncate text-lg font-normal leading-none">
                 {tab === "income" ? "Доходы" : tab === "charges" ? "Зарядки" : tab === "report" ? "Отчёт" : tab === "calc" ? "Расчёт" : tab === "other" ? "Другое" : tab === "accounts" ? "Счета" : tab === "categories" ? "Статьи" : tab === "more" ? "Книга" : "Расходы"}

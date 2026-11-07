@@ -41,7 +41,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -99,8 +102,14 @@ private fun Shell(repo: Repo) {
     CompositionLocalProvider(LocalMoney provides book.currency) {
     Column(Modifier.fillMaxSize().background(Desk).statusBarsPadding()) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text("Грошыки", color = Ink, fontFamily = Display, fontSize = 28.sp, maxLines = 1, modifier = Modifier.weight(1f))
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+                Text(
+                    "Грошыки",
+                    color = Ink,
+                    maxLines = 1,
+                    modifier = Modifier.weight(1f),
+                    style = TextStyle(fontFamily = Display, fontSize = 28.sp, lineHeight = 28.sp, platformStyle = PlatformTextStyle(includeFontPadding = false), lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Bottom, LineHeightStyle.Trim.Both)),
+                )
                 Text(
                     when {
                         sub == "accounts" -> "Счета"
@@ -113,7 +122,13 @@ private fun Shell(repo: Repo) {
                         tab == "book" -> "Книга"
                         else -> "Расходы"
                     },
-                    color = Ink, fontFamily = Body, fontSize = 18.sp, fontWeight = FontWeight.Normal, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End, modifier = Modifier.weight(1f),
+                    color = Ink,
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.weight(1f),
+                    style = TextStyle(fontFamily = Body, fontSize = 18.sp, lineHeight = 18.sp, platformStyle = PlatformTextStyle(includeFontPadding = false), lineHeightStyle = LineHeightStyle(LineHeightStyle.Alignment.Bottom, LineHeightStyle.Trim.Both)),
                 )
             }
             Row(Modifier.padding(top = 4.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {

@@ -1,9 +1,13 @@
-export const APP_VERSION = "1.5.11";
+export const APP_VERSION = "1.5.12";
 
 /** Версия формата книги. Увеличивать только вместе с migrate в store.ts. Ключ localStorage не менять. */
 export const DATA_VERSION = 1;
 
 export const CHANGELOG: { version: string; notes: string[] }[] = [
+  {
+    version: "1.5.12",
+    notes: ["Название раздела стоит по нижнему краю вровень с «Грошыки»."],
+  },
   {
     version: "1.5.11",
     notes: [
