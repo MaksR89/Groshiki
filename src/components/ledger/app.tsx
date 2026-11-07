@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/components/ledger/bits";
 import { CalcView } from "@/components/ledger/calc";
+import { ChargesView } from "@/components/ledger/charges";
 import { Composer } from "@/components/ledger/composer";
 import { Feed } from "@/components/ledger/feed";
 import { AccountsView, CategoriesView, MoreView } from "@/components/ledger/places";
