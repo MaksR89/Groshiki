@@ -99,35 +99,33 @@ private fun Shell(repo: Repo) {
     CompositionLocalProvider(LocalMoney provides book.currency) {
     Column(Modifier.fillMaxSize().background(Desk).statusBarsPadding()) {
         Column(Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
-                Column {
-                    Text("Грошыки", color = Ink, fontFamily = Display, fontSize = 28.sp)
-                    Text(
-                        when {
-                            book.accounts.isEmpty() -> "Нет счетов"
-                            book.accounts.size == 1 -> book.accounts[0].name
-                            else -> "${book.accounts.size} счетов"
-                        },
-                        color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp),
-                    )
-                }
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        when {
-                            sub == "accounts" -> "Счета"
-                            sub == "categories" -> "Статьи"
-                            tab == "income" -> "Доходы"
-                            tab == "charges" -> "Зарядки"
-                            tab == "report" -> "Отчёт"
-                            tab == "calc" -> "Расчёт"
-                            tab == "other" -> "Другое"
-                            tab == "book" -> "Книга"
-                            else -> "Расходы"
-                        },
-                        color = Ink, fontFamily = Body, fontSize = 16.sp, fontWeight = FontWeight.Medium,
-                    )
-                    if (book.showBalance && book.accounts.isNotEmpty()) MoneyText(totalBalance(book), color = Ink, size = 22.sp, font = Display, weight = FontWeight.SemiBold, modifier = Modifier.padding(top = 4.dp))
-                }
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text("Грошыки", color = Ink, fontFamily = Display, fontSize = 28.sp, maxLines = 1, modifier = Modifier.weight(1f))
+                Text(
+                    when {
+                        sub == "accounts" -> "Счета"
+                        sub == "categories" -> "Статьи"
+                        tab == "income" -> "Доходы"
+                        tab == "charges" -> "Зарядки"
+                        tab == "report" -> "Отчёт"
+                        tab == "calc" -> "Расчёт"
+                        tab == "other" -> "Другое"
+                        tab == "book" -> "Книга"
+                        else -> "Расходы"
+                    },
+                    color = Ink, fontFamily = Body, fontSize = 18.sp, fontWeight = FontWeight.Normal, maxLines = 1, overflow = TextOverflow.Ellipsis, textAlign = TextAlign.End, modifier = Modifier.weight(1f),
+                )
+            }
+            Row(Modifier.padding(top = 4.dp).fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    when {
+                        book.accounts.isEmpty() -> "Нет счетов"
+                        book.accounts.size == 1 -> book.accounts[0].name
+                        else -> "${book.accounts.size} счетов"
+                    },
+                    color = Muted, fontFamily = Body, fontSize = 14.sp,
+                )
+                if (book.showBalance && book.accounts.isNotEmpty()) MoneyText(totalBalance(book), color = Ink, size = 22.sp, font = Display, weight = FontWeight.SemiBold)
             }
             val hideAdd = tab == "calc" || (tab == "other" && !unlocked)
             if (!hideAdd) {
