@@ -1,9 +1,16 @@
-export const APP_VERSION = "1.5.13";
+export const APP_VERSION = "1.5.14";
 
 /** Версия формата книги. Увеличивать только вместе с migrate в store.ts. Ключ localStorage не менять. */
 export const DATA_VERSION = 1;
 
 export const CHANGELOG: { version: string; notes: string[] }[] = [
+  {
+    version: "1.5.14",
+    notes: [
+      "На клавиатуре суммы появились плюс, минус, умножение, деление и равно.",
+      "В Книге снова есть бежевая тема и белая «Облачный танцор».",
+    ],
+  },
   {
     version: "1.5.13",
     notes: [

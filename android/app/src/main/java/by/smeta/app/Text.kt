@@ -56,6 +56,15 @@ fun formatCount(n: Int): String = group(n.toLong())
 private fun group(n: Long): String = n.toString().reversed().chunked(3).joinToString("\u00a0").reversed()
 
 fun inputToCents(raw: String): Long {
+    val expr = splitExpr(raw)
+    if (expr != null && expr.third.isNotEmpty() && expr.third != "-" && expr.third != ".") {
+        computeCents(expr.first, expr.second, expr.third)?.let { return it }
+    }
+    val plain = if (expr != null && (expr.third.isEmpty() || expr.third == "-" || expr.third == ".")) expr.first else raw
+    return operandCents(plain)
+}
+
+private fun operandCents(raw: String): Long {
     if (raw.isBlank() || raw == "." || raw == "-") return 0
     val neg = raw.trim().startsWith("-")
     val clean = raw.replace("-", "")
@@ -75,6 +84,12 @@ fun centsToInput(cents: Long): String {
 }
 
 fun formatRawInput(raw: String): String {
+    val expr = splitExpr(raw) ?: return formatOperand(raw)
+    val right = if (expr.third.isEmpty()) "" else " ${formatOperand(expr.third)}"
+    return "${formatOperand(expr.first)} ${expr.second}$right"
+}
+
+private fun formatOperand(raw: String): String {
     if (raw.isBlank() || raw == "-" || raw == "." || raw == "-.") return "0"
     val neg = raw.startsWith("-")
     val clean = raw.removePrefix("-")
@@ -82,6 +97,63 @@ fun formatRawInput(raw: String): String {
     val grouped = (bits[0].ifBlank { "0" }).reversed().chunked(3).joinToString(" ").reversed()
     val body = if (bits.size == 1) grouped else "$grouped,${bits[1]}"
     return if (neg) "−$body" else body
+}
+
+private val OPS = setOf("+", "−", "×", "÷")
+
+private fun splitExpr(raw: String): Triple<String, String, String>? {
+    var i = if (raw.startsWith("-")) 1 else 0
+    while (i < raw.length) {
+        val ch = raw[i].toString()
+        if (ch in OPS) return Triple(raw.substring(0, i), ch, raw.substring(i + 1))
+        i++
+    }
+    return null
+}
+
+private fun computeCents(left: String, op: String, right: String): Long? {
+    val a = operandCents(left)
+    val b = operandCents(right)
+    val result = when (op) {
+        "+" -> a + b
+        "−" -> a - b
+        "×" -> roundDiv(a.toBigDecimal().multiply(b.toBigDecimal()), 100.toBigDecimal())
+        "÷" -> if (b == 0L) null else roundDiv(a.toBigDecimal().multiply(100.toBigDecimal()), b.toBigDecimal())
+        else -> null
+    } ?: return null
+    if (kotlin.math.abs(result) > 9_999_999_999L) return null
+    return result
+}
+
+private fun roundDiv(num: java.math.BigDecimal, den: java.math.BigDecimal): Long =
+    num.divide(den, 0, java.math.RoundingMode.HALF_UP).longValueExact()
+
+private fun fromHundredths(cents: Long): String {
+    val abs = kotlin.math.abs(cents)
+    val whole = abs / 100
+    val frac = abs % 100
+    val body = when {
+        frac == 0L -> whole.toString()
+        frac % 10L == 0L -> "$whole.${frac / 10}"
+        else -> "$whole.${frac.toString().padStart(2, '0')}"
+    }
+    return if (cents < 0) "-$body" else body
+}
+
+private fun onActive(raw: String, edit: (String) -> String): String {
+    val expr = splitExpr(raw) ?: return edit(raw)
+    return expr.first + expr.second + edit(expr.third)
+}
+
+private fun applyOp(raw: String, key: String): String {
+    val expr = splitExpr(raw)
+    if (expr == null || expr.third.isEmpty() || expr.third == "-" || expr.third == ".") {
+        val left = expr?.first ?: raw.ifEmpty { "0" }
+        return if (key == "=") left else "$left$key"
+    }
+    val result = computeCents(expr.first, expr.second, expr.third) ?: return raw
+    val shown = fromHundredths(result)
+    return if (key == "=") shown else "$shown$key"
 }
 
 fun parseLooseCents(input: String): Long? {
@@ -110,14 +182,20 @@ fun backspaceRaw(raw: String): String {
 }
 
 fun applyKey(raw: String, key: String): String = when (key) {
-    "⌫" -> backspaceRaw(raw)
-    "," -> pushDot(raw)
-    "±" -> when {
-        raw.startsWith("-") -> raw.drop(1)
-        raw.isNotEmpty() -> "-$raw"
-        else -> "-"
+    "⌫" -> onActive(raw) { backspaceRaw(it) }.let { next ->
+        val expr = splitExpr(raw)
+        if (expr != null && expr.third.isEmpty()) raw.dropLast(1) else next
     }
-    else -> pushDigit(raw, key)
+    "," -> onActive(raw, ::pushDot)
+    "±" -> onActive(raw) { value ->
+        when {
+            value.startsWith("-") -> value.drop(1)
+            value.isNotEmpty() -> "-$value"
+            else -> "-"
+        }
+    }
+    "+", "−", "×", "÷", "=" -> applyOp(raw, key)
+    else -> onActive(raw) { pushDigit(it, key) }
 }
 
 fun inAccount(entry: Entry, accountId: String) = accountId == "all" || entry.accountId == accountId || entry.toAccountId == accountId

@@ -457,10 +457,14 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
         }
         Text("Суммы не пересчитываются. Меняется только знак.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
         Text("Тема", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 16.dp))
-        Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(CircleShape).background(Chip).padding(4.dp)) {
-            listOf("blue" to "Голубая", "dark" to "Тёмная").forEach { (id, label) ->
-                Box(Modifier.weight(1f).height(40.dp).clip(CircleShape).background(if (book.theme == id) Surface else Color.Transparent).clickable { repo.update { it.copy(theme = id) } }, contentAlignment = Alignment.Center) {
-                    Text(label, color = if (book.theme == id) Ink else Muted, fontFamily = Body, fontSize = 14.sp, fontWeight = if (book.theme == id) FontWeight.Medium else FontWeight.Normal)
+        Column(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Chip).padding(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            listOf("blue" to "Голубая", "beige" to "Бежевая", "cloud" to "Белая", "dark" to "Тёмная").chunked(2).forEach { row ->
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    row.forEach { (id, label) ->
+                        Box(Modifier.weight(1f).height(40.dp).clip(RoundedCornerShape(16.dp)).background(if (book.theme == id) Surface else Color.Transparent).clickable { repo.update { it.copy(theme = id) } }, contentAlignment = Alignment.Center) {
+                            Text(label, color = if (book.theme == id) Ink else Muted, fontFamily = Body, fontSize = 14.sp, fontWeight = if (book.theme == id) FontWeight.Medium else FontWeight.Normal)
+                        }
+                    }
                 }
             }
         }
@@ -493,7 +497,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
                 Text("Отмена", color = Ink, modifier = Modifier.clickable { confirm = false }.padding(10.dp))
             }
         }
-        Text("Версия 1.5.13", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
+        Text("Версия 1.5.14", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
     }
     if (pass != null) Column(Modifier.fillMaxSize().background(Desk)) {
         LockBody(repo, if (pass == "create") "create" else "change", "Другое") { pass = null }

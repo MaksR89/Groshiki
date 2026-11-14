@@ -70,7 +70,12 @@ fun GroshikiApp(repo: Repo) {
         if (left > 0) delay(left)
         splash = false
     }
-    val palette = if (repo.book.theme == "dark") DarkTheme else BlueTheme
+    val palette = when (repo.book.theme) {
+        "dark" -> DarkTheme
+        "beige" -> BeigeTheme
+        "cloud" -> CloudTheme
+        else -> BlueTheme
+    }
     val view = LocalView.current
     SideEffect {
         val window = (view.context as? Activity)?.window ?: return@SideEffect
@@ -455,7 +460,7 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
                     }
                 }
             }
-            Text(formatRawInput(raw), color = Ink, fontFamily = Display, fontSize = 48.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp).fillMaxWidth())
+            Text(formatRawInput(raw), color = Ink, fontFamily = Display, fontSize = if (raw.any { it in "+−×÷" }) 32.sp else 48.sp, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 12.dp).fillMaxWidth())
             Row(Modifier.padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Picker(date, Modifier.weight(1f)) { pickDate(context, date) { date = it } }
                 Picker(time, Modifier.weight(1f)) { pickTime(context, time) { time = it } }

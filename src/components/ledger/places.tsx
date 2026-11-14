@@ -346,9 +346,15 @@ export function MoreView({
       </label>
       <p className="mt-2 px-1 text-sm leading-relaxed text-muted">Суммы не пересчитываются. Меняется только знак. «Другое» ведёт свою валюту.</p>
       <p className="mt-5 text-sm text-muted">Тема</p>
-      <div className="mt-2 grid grid-cols-2 rounded-full bg-chip p-1">
-        <button type="button" onClick={() => setTheme("blue")} className={cn("h-10 rounded-full text-sm", theme !== "dark" ? "bg-surface font-medium" : "text-muted")}>Голубая</button>
-        <button type="button" onClick={() => setTheme("dark")} className={cn("h-10 rounded-full text-sm", theme === "dark" ? "bg-surface font-medium" : "text-muted")}>Тёмная</button>
+      <div className="mt-2 grid grid-cols-2 gap-1 rounded-2xl bg-chip p-1">
+        {([
+          ["blue", "Голубая"],
+          ["beige", "Бежевая"],
+          ["cloud", "Белая"],
+          ["dark", "Тёмная"],
+        ] as const).map(([id, label]) => (
+          <button key={id} type="button" onClick={() => setTheme(id)} className={cn("h-10 rounded-xl text-sm", theme === id ? "bg-surface font-medium" : "text-muted")}>{label}</button>
+        ))}
       </div>
 
       <div className="mt-5 grid gap-2">

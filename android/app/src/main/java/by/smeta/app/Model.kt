@@ -117,7 +117,10 @@ fun bookFromJson(raw: JSONObject): Book {
         showReserve = root.optBoolean("showReserve", false),
         reserveHash = root.optString("reserveHash", ""),
         currency = root.optString("currency", "BYN").let { if (it in setOf("BYN", "USD", "EUR", "RUB")) it else "BYN" },
-        theme = if (root.optString("theme") == "dark") "dark" else "blue",
+        theme = when (root.optString("theme")) {
+            "dark", "beige", "cloud" -> root.optString("theme")
+            else -> "blue"
+        },
     ).withOperators()
 }
 

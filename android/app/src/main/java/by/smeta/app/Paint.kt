@@ -69,6 +69,29 @@ val BlueTheme = Palette(
     income = Color(0xFF1C7A56),
 )
 
+val BeigeTheme = Palette(
+    desk = Color(0xFFE7DFD2),
+    paper = Color(0xFFF4EFE6),
+    surface = Color(0xFFFFFDF8),
+    ink = Color(0xFF1C1712),
+    muted = Color(0xFF6F675E),
+    line = Color(0xFFE3D8C8),
+    chip = Color(0xFFF1E9DC),
+    expense = Color(0xFFB4332A),
+    income = Color(0xFF1B6B45),
+)
+
+val CloudTheme = Palette(
+    desk = Color(0xFFF0EEE9),
+    paper = Color(0xFFF0EEE9),
+    surface = Color(0xFFFFFFFF),
+    ink = Color(0xFF2A2826),
+    muted = Color(0xFF746F68),
+    line = Color(0xFFE3E0D9),
+    chip = Color(0xFFE6E3DC),
+    expense = Color(0xFFC4473C),
+    income = Color(0xFF1C7A56),
+)
 val DarkTheme = Palette(
     desk = Color(0xFF0E1620),
     paper = Color(0xFF15202B),
@@ -153,27 +176,37 @@ fun ForeignSum(cents: Long, currency: String, size: TextUnit = 22.sp, color: Col
 
 @Composable
 fun Keypad(signed: Boolean = false, onKey: (String) -> Unit) {
-    val keys = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "⌫")
+    val rows = listOf(
+        listOf("1", "2", "3", "+"),
+        listOf("4", "5", "6", "−"),
+        listOf("7", "8", "9", "×"),
+        listOf(",", "0", "⌫", "÷"),
+    )
     Column(
         Modifier.clickable(remember { MutableInteractionSource() }, null) {},
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (signed) PadKey("±", Modifier.fillMaxWidth(), onKey)
-        keys.chunked(3).forEach { row ->
+        rows.forEach { row ->
             androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { key -> PadKey(key, Modifier.weight(1f), onKey) }
             }
+        }
+        androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            if (signed) PadKey("±", Modifier.weight(1f), onKey)
+            PadKey("=", Modifier.weight(if (signed) 3f else 1f), onKey)
         }
     }
 }
 
 @Composable
 private fun PadKey(key: String, modifier: Modifier, onKey: (String) -> Unit) {
+    val op = key in setOf("+", "−", "×", "÷", "±")
+    val eq = key == "="
     Box(
-        modifier.height(48.dp).clip(RoundedCornerShape(16.dp)).background(if (key == "±") Chip else Surface).clickable { onKey(key) },
+        modifier.height(48.dp).clip(RoundedCornerShape(16.dp)).background(when { eq -> Ink; op -> Chip; else -> Surface }).clickable { onKey(key) },
         contentAlignment = Alignment.Center,
     ) {
-        if (key == "⌫") LineIcon("delete", tint = Ink, size = 20.dp) else Text(key, color = Ink, fontFamily = Body, fontSize = 20.sp)
+        if (key == "⌫") LineIcon("delete", tint = Ink, size = 20.dp) else Text(key, color = if (eq) Surface else Ink, fontFamily = Body, fontSize = if (eq) 22.sp else 20.sp)
     }
 }
 

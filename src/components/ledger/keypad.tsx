@@ -1,34 +1,54 @@
 import { Delete } from "lucide-react";
 import { cn } from "@/components/ledger/bits";
-import { backspaceRaw, formatRawInput, pushDigit, pushDot } from "@/lib/money/format";
+import { applyCalcKey, backspaceRaw, formatRawInput, pushDigit, pushDot } from "@/lib/money/format";
 
-const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ",", "0", "⌫"] as const;
+const ROWS = [
+  ["1", "2", "3", "+"],
+  ["4", "5", "6", "−"],
+  ["7", "8", "9", "×"],
+  [",", "0", "⌫", "÷"],
+] as const;
 
 export function applyKey(raw: string, key: string): string {
-  if (key === "⌫") return backspaceRaw(raw);
-  if (key === ",") return pushDot(raw);
-  if (key === "±") return raw.startsWith("-") ? raw.slice(1) : raw ? `-${raw}` : "-";
-  return pushDigit(raw, key);
+  const calc = applyCalcKey(raw, key);
+  if (calc !== null) return calc;
+  if (key === "⌫") {
+    const exprAt = [...raw].findIndex((ch, i) => i > 0 && "+−×÷".includes(ch));
+    if (exprAt > 0 && exprAt === raw.length - 1) return raw.slice(0, -1);
+    return mapSide(raw, backspaceRaw);
+  }
+  if (key === ",") return mapSide(raw, pushDot);
+  if (key === "±") return mapSide(raw, (value) => (value.startsWith("-") ? value.slice(1) : value ? `-${value}` : "-"));
+  return mapSide(raw, (value) => pushDigit(value, key));
+}
+
+function mapSide(raw: string, edit: (value: string) => string): string {
+  const at = [...raw].findIndex((ch, i) => i > 0 && "+−×÷".includes(ch));
+  if (at < 0) return edit(raw);
+  return raw.slice(0, at + 1) + edit(raw.slice(at + 1));
 }
 
 export function Keypad({ onKey, signed }: { onKey: (key: string) => void; signed?: boolean }) {
   return (
-    <div className="grid grid-cols-3 gap-2 touch-none">
-      {signed ? (
-        <button type="button" onClick={() => onKey("±")} className="col-span-3 flex h-11 items-center justify-center rounded-2xl bg-chip text-lg">
-          ±
-        </button>
-      ) : null}
-      {KEYS.map((key) => (
+    <div className="grid grid-cols-4 gap-2 touch-none">
+      {ROWS.flat().map((key) => (
         <button
           key={key}
           type="button"
           onClick={() => onKey(key)}
-          className="flex h-12 items-center justify-center rounded-2xl bg-surface text-xl"
+          className={cn("flex h-12 items-center justify-center rounded-2xl text-xl", "+−×÷".includes(key) ? "bg-chip" : "bg-surface")}
         >
           {key === "⌫" ? <Delete className="size-5" aria-label="Стереть" /> : key}
         </button>
       ))}
+      {signed ? (
+        <button type="button" onClick={() => onKey("±")} className="flex h-12 items-center justify-center rounded-2xl bg-chip text-xl">
+          ±
+        </button>
+      ) : null}
+      <button type="button" onClick={() => onKey("=")} className={cn("flex h-12 items-center justify-center rounded-2xl bg-ink text-xl text-surface", signed ? "col-span-3" : "col-span-4")}>
+        =
+      </button>
     </div>
   );
 }

@@ -56,7 +56,7 @@ export function LedgerApp() {
   const [showBalance] = useShowBalance();
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme === "dark" ? "dark" : "blue";
+    document.documentElement.dataset.theme = theme || "blue";
   }, [theme]);
 
   useEffect(() => {

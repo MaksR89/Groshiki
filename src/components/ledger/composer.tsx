@@ -86,7 +86,14 @@ export function Composer({
       if (e.key >= "0" && e.key <= "9") setRaw((v) => applyKey(v, e.key));
       else if (e.key === "." || e.key === ",") setRaw((v) => applyKey(v, ","));
       else if (e.key === "Backspace") setRaw((v) => applyKey(v, "⌫"));
-      else if (e.key === "Enter") save();
+      else if (e.key === "+") setRaw((v) => applyKey(v, "+"));
+      else if (e.key === "-") setRaw((v) => applyKey(v, "−"));
+      else if (e.key === "*") setRaw((v) => applyKey(v, "×"));
+      else if (e.key === "/") setRaw((v) => applyKey(v, "÷"));
+      else if (e.key === "=" || e.key === "Enter") {
+        if (e.key === "=") setRaw((v) => applyKey(v, "="));
+        else save();
+      }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -151,7 +158,7 @@ export function Composer({
                 </button>
               ))}
             </div>
-            <div className="mt-3 text-center font-display text-5xl tabular-nums" aria-live="polite">
+            <div className={cn("mt-3 text-center font-display tabular-nums", /[+−×÷]/.test(raw) ? "text-3xl" : "text-5xl")} aria-live="polite">
               {formatRawInput(raw)}
             </div>
           </div>

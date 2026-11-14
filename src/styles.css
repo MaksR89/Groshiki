@@ -15,6 +15,29 @@
   --color-income: #1c7a56;
 }
 
+html[data-theme="beige"] {
+  --color-desk: #e7dfd2;
+  --color-bg: #f4efe6;
+  --color-surface: #fffdf8;
+  --color-ink: #1c1712;
+  --color-muted: #6f675e;
+  --color-line: #e3d8c8;
+  --color-chip: #f1e9dc;
+  --color-expense: #b4332a;
+  --color-income: #1b6b45;
+}
+
+html[data-theme="cloud"] {
+  --color-desk: #f0eee9;
+  --color-bg: #f0eee9;
+  --color-surface: #ffffff;
+  --color-ink: #2a2826;
+  --color-muted: #746f68;
+  --color-line: #e3e0d9;
+  --color-chip: #e6e3dc;
+  --color-expense: #c4473c;
+  --color-income: #1c7a56;
+}
 html[data-theme="dark"] {
   --color-desk: #0e1620;
   --color-bg: #15202b;
