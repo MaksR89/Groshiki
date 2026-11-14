@@ -42,7 +42,7 @@ export function EntryRow({
     <button
       type="button"
       onClick={() => onOpen(entry)}
-      className="flex w-full items-center gap-3 border-b border-line py-3 text-left last:border-b-0"
+      className="mt-2 flex w-full items-center gap-3 rounded-2xl bg-plate px-3 py-3 text-left"
     >
       <span
         className="grid size-11 shrink-0 place-items-center rounded-full bg-chip"

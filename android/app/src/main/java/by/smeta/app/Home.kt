@@ -362,7 +362,7 @@ private fun MixedDays(lines: List<FeedLine>, book: Book, onOpen: (Entry) -> Unit
                     val time = entry.at.drop(11).take(5)
                     if (time.isNotBlank() && time != "00:00") add(time)
                 }.joinToString(" · ")
-                Row(Modifier.fillMaxWidth().clickable { onOpen(entry) }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Plate).clickable { onOpen(entry) }.padding(horizontal = 12.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(44.dp).clip(CircleShape).background(Chip), contentAlignment = Alignment.Center) {
                         LineIcon(if (entry.kind == "transfer") "repeat" else cat?.icon ?: "ellipsis", tint = if (cat != null) parseHex(cat.color) else Muted, size = 20.dp)
                     }
@@ -375,7 +375,7 @@ private fun MixedDays(lines: List<FeedLine>, book: Book, onOpen: (Entry) -> Unit
             } else if (charge != null) {
                 val station = book.stations.find { it.id == charge.stationId }
                 val time = charge.at.drop(11).take(5)
-                Row(Modifier.fillMaxWidth().clickable { onCharge(charge) }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Plate).clickable { onCharge(charge) }.padding(horizontal = 12.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(Modifier.size(44.dp).clip(CircleShape).background(Chip), contentAlignment = Alignment.Center) {
                         if (station != null) StationMark(station, 28.dp) else LineIcon("plug-zap", size = 20.dp)
                     }
@@ -386,7 +386,6 @@ private fun MixedDays(lines: List<FeedLine>, book: Book, onOpen: (Entry) -> Unit
                     MoneyText(charge.price, weight = FontWeight.Medium)
                 }
             }
-            Box(Modifier.fillMaxWidth().height(1.dp).background(Line))
         }
     }
 }
@@ -405,7 +404,7 @@ fun DayList(entries: List<Entry>, book: Book, onOpen: (Entry) -> Unit) {
                 val time = entry.at.drop(11).take(5)
                 if (time.isNotBlank() && time != "00:00") add(time)
             }.joinToString(" · ")
-            Row(Modifier.fillMaxWidth().clickable { onOpen(entry) }.padding(vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Plate).clickable { onOpen(entry) }.padding(horizontal = 12.dp, vertical = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(44.dp).clip(CircleShape).background(Chip), contentAlignment = Alignment.Center) {
                     LineIcon(if (entry.kind == "transfer") "repeat" else cat?.icon ?: "ellipsis", tint = if (cat != null) parseHex(cat.color) else Muted, size = 20.dp)
                 }
@@ -415,7 +414,6 @@ fun DayList(entries: List<Entry>, book: Book, onOpen: (Entry) -> Unit) {
                 }
                 MoneyText(entry.amount, color = if (entry.kind == "income") Income else Ink, weight = FontWeight.Medium)
             }
-            Box(Modifier.fillMaxWidth().height(1.dp).background(Line))
         }
     }
 }

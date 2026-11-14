@@ -56,6 +56,7 @@ data class Palette(
     val chip: Color,
     val expense: Color,
     val income: Color,
+    val plate: Color,
 )
 
 val BlueTheme = Palette(
@@ -68,6 +69,7 @@ val BlueTheme = Palette(
     chip = Color(0xFFE3F0F8),
     expense = Color(0xFFC4473C),
     income = Color(0xFF1C7A56),
+    plate = Color(0xFFFFFFFF),
 )
 
 val BeigeTheme = Palette(
@@ -80,6 +82,7 @@ val BeigeTheme = Palette(
     chip = Color(0xFFF1E9DC),
     expense = Color(0xFFB4332A),
     income = Color(0xFF1B6B45),
+    plate = Color(0xFFFFFDF8),
 )
 
 val CloudTheme = Palette(
@@ -92,6 +95,7 @@ val CloudTheme = Palette(
     chip = Color(0xFFF2F2F2),
     expense = Color(0xFFC4473C),
     income = Color(0xFF1C7A56),
+    plate = Color(0xFFE8E8E8),
 )
 val DarkTheme = Palette(
     desk = Color(0xFF0E1620),
@@ -103,6 +107,7 @@ val DarkTheme = Palette(
     chip = Color(0xFF263646),
     expense = Color(0xFFFF8A80),
     income = Color(0xFF7DDBA8),
+    plate = Color(0xFF1E2C3A),
 )
 
 val LocalPalette = compositionLocalOf { BlueTheme }
@@ -116,6 +121,7 @@ val Line: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.lin
 val Chip: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.chip
 val Expense: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.expense
 val Income: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.income
+val Plate: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.plate
 
 val Display = FontFamily(Font(R.font.literata_semibold, FontWeight.SemiBold))
 val Body = FontFamily(Font(R.font.manrope_medium, FontWeight.Medium), Font(R.font.manrope_semibold, FontWeight.SemiBold))

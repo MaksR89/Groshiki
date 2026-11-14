@@ -13,6 +13,7 @@
   --color-chip: #e3f0f8;
   --color-expense: #c4473c;
   --color-income: #1c7a56;
+  --color-plate: #ffffff;
 }
 
 html[data-theme="beige"] {
@@ -25,6 +26,7 @@ html[data-theme="beige"] {
   --color-chip: #f1e9dc;
   --color-expense: #b4332a;
   --color-income: #1b6b45;
+  --color-plate: #fffdf8;
 }
 
 html[data-theme="cloud"] {
@@ -37,6 +39,7 @@ html[data-theme="cloud"] {
   --color-chip: #f2f2f2;
   --color-expense: #c4473c;
   --color-income: #1c7a56;
+  --color-plate: #e8e8e8;
 }
 html[data-theme="dark"] {
   --color-desk: #0e1620;
@@ -48,6 +51,7 @@ html[data-theme="dark"] {
   --color-chip: #263646;
   --color-expense: #ff8a80;
   --color-income: #7ddba8;
+  --color-plate: #1e2c3a;
   color-scheme: dark;
 }
 

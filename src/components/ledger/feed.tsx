@@ -252,7 +252,7 @@ function ExpenseDays({
             {group.items.map((line) => line.entry ? (
               <EntryRow key={line.entry.id} entry={line.entry} category={categories.find((c) => c.id === line.entry?.categoryId)} accounts={accounts} onOpen={onOpen} />
             ) : line.charge ? (
-              <button key={line.charge.id} type="button" onClick={() => onCharge(line.charge as Charge)} className="flex w-full items-center gap-3 border-b border-line py-3 text-left">
+              <button key={line.charge.id} type="button" onClick={() => onCharge(line.charge as Charge)} className="mt-2 flex w-full items-center gap-3 rounded-2xl bg-plate px-3 py-3 text-left">
                 <span className="grid size-11 shrink-0 place-items-center overflow-hidden rounded-full bg-chip">
                   {stationById.get(line.charge.stationId) ? <StationMark station={stationById.get(line.charge.stationId)!} className="size-7 rounded-md object-cover" /> : null}
                 </span>
