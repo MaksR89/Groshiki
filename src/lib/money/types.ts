@@ -16,6 +16,7 @@ export type Category = {
   group: string;
   icon: string;
   color: string;
+  hidden?: boolean;
 };
 
 export type Entry = {

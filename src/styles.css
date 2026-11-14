@@ -4,15 +4,28 @@
   --font-sans: "Manrope", "Segoe UI", sans-serif;
   --font-display: "Literata", Georgia, serif;
 
-  --color-desk: #e7dfd2;
-  --color-bg: #f4efe6;
-  --color-surface: #fffdf8;
-  --color-ink: #1c1712;
-  --color-muted: #6f675e;
-  --color-line: #e3d8c8;
-  --color-chip: #f1e9dc;
-  --color-expense: #b4332a;
-  --color-income: #1b6b45;
+  --color-desk: #d9e8f4;
+  --color-bg: #eaf3fa;
+  --color-surface: #ffffff;
+  --color-ink: #143047;
+  --color-muted: #5c7386;
+  --color-line: #c9dcec;
+  --color-chip: #e3f0f8;
+  --color-expense: #c4473c;
+  --color-income: #1c7a56;
+}
+
+html[data-theme="dark"] {
+  --color-desk: #0e1620;
+  --color-bg: #15202b;
+  --color-surface: #1e2c3a;
+  --color-ink: #e7f0f7;
+  --color-muted: #9aadbd;
+  --color-line: #314556;
+  --color-chip: #263646;
+  --color-expense: #ff8a80;
+  --color-income: #7ddba8;
+  color-scheme: dark;
 }
 
 @layer base {
@@ -24,7 +37,6 @@
     font-family: var(--font-sans);
     background: var(--color-desk);
     color: var(--color-ink);
-    color-scheme: light;
     text-wrap: pretty;
   }
   h1, h2, h3 {

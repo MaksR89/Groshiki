@@ -52,7 +52,12 @@ export function LedgerApp() {
   const showReport = useLedger((s) => s.showReport);
   const showCalc = useLedger((s) => s.showCalc);
   const showReserve = useLedger((s) => s.showReserve);
+  const theme = useLedger((s) => s.theme);
   const [showBalance] = useShowBalance();
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme === "dark" ? "dark" : "blue";
+  }, [theme]);
 
   useEffect(() => {
     if (tab !== "other") setOtherOpen(false);

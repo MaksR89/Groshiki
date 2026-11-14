@@ -17,6 +17,7 @@ export type MirroredBook = {
   showReserve?: boolean;
   reserveHash?: string;
   currency?: string;
+  theme?: "blue" | "dark";
   aids?: unknown[];
   holds?: unknown[];
   deposits?: unknown[];

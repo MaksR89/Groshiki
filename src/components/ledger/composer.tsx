@@ -47,10 +47,10 @@ export function Composer({
       if (e.categoryId && e.kind === kind) counts.set(e.categoryId, (counts.get(e.categoryId) ?? 0) + 1);
     }
     return categories
-      .filter((c) => c.kind === kind || c.kind === "both")
+      .filter((c) => (c.kind === kind || c.kind === "both") && (!c.hidden || c.id === categoryId))
       .slice()
       .sort((a, b) => (counts.get(b.id) ?? 0) - (counts.get(a.id) ?? 0) || a.name.localeCompare(b.name, "ru"));
-  }, [categories, entries, kind]);
+  }, [categories, entries, kind, categoryId]);
 
   const cents = inputToCents(raw);
   const canSave =

@@ -24,6 +24,7 @@ type LedgerState = Snapshot & {
   showReserve: boolean;
   reserveHash: string;
   currency: Currency;
+  theme: "blue" | "dark";
   setShowBalance: (on: boolean) => void;
   setShowCharges: (on: boolean) => void;
   setShowReport: (on: boolean) => void;
@@ -31,6 +32,7 @@ type LedgerState = Snapshot & {
   setShowReserve: (on: boolean) => void;
   setReserveHash: (hash: string) => void;
   setCurrency: (currency: Currency) => void;
+  setTheme: (theme: "blue" | "dark") => void;
   clearAll: () => void;
   replaceAll: (snapshot: Snapshot) => void;
   addEntry: (entry: Omit<Entry, "id">) => void;
@@ -93,6 +95,7 @@ export const useLedger = create<LedgerState>()(
       showReserve: false,
       reserveHash: "",
       currency: "BYN",
+      theme: "blue",
       setShowBalance: (on) => set({ showBalance: on }),
       setShowCharges: (on) => set({ showCharges: on }),
       setShowReport: (on) => set({ showReport: on }),
@@ -100,6 +103,7 @@ export const useLedger = create<LedgerState>()(
       setShowReserve: (on) => set({ showReserve: on }),
       setReserveHash: (hash) => set({ reserveHash: hash }),
       setCurrency: (currency) => set({ currency }),
+      setTheme: (theme) => set({ theme }),
       clearAll: () =>
         set({
           accounts: [],
@@ -228,6 +232,7 @@ export const useLedger = create<LedgerState>()(
         showReserve: s.showReserve,
         reserveHash: s.reserveHash,
         currency: s.currency,
+        theme: s.theme,
       }),
     },
   ),
@@ -300,6 +305,7 @@ function keepBook(raw: MirroredBook | undefined): {
   showReserve: boolean;
   reserveHash: string;
   currency: Currency;
+  theme: "blue" | "dark";
 } {
   const book = raw ?? {};
   const source: Source = book.source === "empty" || book.source === "moneyok" || book.source === "cleared" || book.source === "edited" ? book.source : "edited";
@@ -321,6 +327,7 @@ function keepBook(raw: MirroredBook | undefined): {
     showReserve: book.showReserve === true,
     reserveHash: typeof book.reserveHash === "string" ? book.reserveHash : "",
     currency: book.currency === "USD" || book.currency === "EUR" || book.currency === "RUB" || book.currency === "BYN" ? book.currency : "BYN",
+    theme: book.theme === "dark" ? "dark" : "blue",
   };
 }
 
@@ -360,6 +367,7 @@ function pickBook(state: LedgerState): MirroredBook {
     showReserve: state.showReserve,
     reserveHash: state.reserveHash,
     currency: state.currency,
+    theme: state.theme,
   };
 }
 

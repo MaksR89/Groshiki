@@ -144,9 +144,10 @@ export function CategoriesView({ onBack }: { onBack?: () => void }) {
       </div>
       <div className="mt-4 grid grid-cols-4 gap-2">
         {shown.map((cat) => (
-          <button key={cat.id} type="button" onClick={() => setEditing(cat)} className="flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl bg-surface px-1 py-2" style={{ color: cat.color }}>
+          <button key={cat.id} type="button" onClick={() => setEditing(cat)} className={cn("flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl bg-surface px-1 py-2", cat.hidden && "opacity-40")} style={{ color: cat.color }}>
             <CatIcon name={cat.icon} className="size-6" />
             <span className="line-clamp-2 text-center text-xs leading-tight text-ink">{cat.name}</span>
+            {cat.hidden ? <span className="text-[11px] text-muted">скрыта</span> : null}
           </button>
         ))}
         <button
@@ -171,6 +172,7 @@ function CategoryDialog({ category, onClose }: { category: Category; onClose: ()
   const [kind, setKind] = useState<CatKind>(category.kind);
   const [icon, setIcon] = useState(category.icon);
   const [color, setColor] = useState(category.color);
+  const [hidden, setHidden] = useState(Boolean(category.hidden));
   const [error, setError] = useState<string | null>(null);
   const isNew = !category.id;
 
@@ -187,9 +189,8 @@ function CategoryDialog({ category, onClose }: { category: Category; onClose: ()
               onClick={() => {
                 const trimmed = name.trim();
                 if (!trimmed) { setError("Нужно название."); return; }
-                const patch = { name: trimmed, group: group.trim(), kind, icon, color };
-                if (isNew) addCategory(patch);
-                else updateCategory(category.id, patch);
+                if (isNew) addCategory({ name: trimmed, group: group.trim(), kind, icon, color });
+                else updateCategory(category.id, { icon, color, hidden });
                 onClose();
               }}
               className="h-11 rounded-full bg-ink px-4 font-medium text-surface"
@@ -198,15 +199,26 @@ function CategoryDialog({ category, onClose }: { category: Category; onClose: ()
             </button>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6">
-            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Название" className="h-11 w-full rounded-xl border border-line bg-surface px-3 outline-none" />
-            <input value={group} onChange={(e) => setGroup(e.target.value)} placeholder="Группа, если нужна" className="mt-2 h-11 w-full rounded-xl border border-line bg-surface px-3 outline-none placeholder:text-muted" />
-            <div className="mt-3 grid grid-cols-3 rounded-full bg-chip p-1">
-              {(["expense", "income", "both"] as const).map((id) => (
-                <button key={id} type="button" onClick={() => setKind(id)} className={cn("h-9 rounded-full text-sm", kind === id ? "bg-surface font-medium" : "text-muted")}>
-                  {id === "expense" ? "Расход" : id === "income" ? "Доход" : "Обе"}
-                </button>
-              ))}
-            </div>
+            {isNew ? (
+              <>
+                <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Название" className="h-11 w-full rounded-xl border border-line bg-surface px-3 outline-none" />
+                <input value={group} onChange={(e) => setGroup(e.target.value)} placeholder="Группа, если нужна" className="mt-2 h-11 w-full rounded-xl border border-line bg-surface px-3 outline-none placeholder:text-muted" />
+                <div className="mt-3 grid grid-cols-3 rounded-full bg-chip p-1">
+                  {(["expense", "income", "both"] as const).map((id) => (
+                    <button key={id} type="button" onClick={() => setKind(id)} className={cn("h-9 rounded-full text-sm", kind === id ? "bg-surface font-medium" : "text-muted")}>
+                      {id === "expense" ? "Расход" : id === "income" ? "Доход" : "Обе"}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="font-display text-2xl">{category.name}</p>
+                {category.group ? <p className="mt-1 text-sm text-muted">{category.group}</p> : null}
+                <p className="mt-1 text-sm text-muted">{category.kind === "income" ? "Доход" : category.kind === "both" ? "Доход и расход" : "Расход"}</p>
+                <p className="mt-2 text-sm text-muted">Название и вид не меняются: старые записи останутся на этой статье.</p>
+              </>
+            )}
             <div className="mt-4 flex flex-wrap gap-2">
               {SWATCHES.map((swatch) => (
                 <button key={swatch} type="button" aria-label={swatch} onClick={() => setColor(swatch)} className={cn("size-9 rounded-full", color === swatch && "ring-2 ring-ink ring-offset-2 ring-offset-bg")} style={{ background: swatch }} />
@@ -219,6 +231,14 @@ function CategoryDialog({ category, onClose }: { category: Category; onClose: ()
                 </button>
               ))}
             </div>
+            {!isNew ? (
+              <button type="button" role="switch" aria-checked={hidden} onClick={() => setHidden((v) => !v)} className="mt-4 flex h-12 w-full items-center justify-between rounded-2xl bg-chip px-4 text-left">
+                <span>Скрыть</span>
+                <span className={cn("flex h-7 w-12 rounded-full p-1", hidden ? "bg-ink" : "bg-surface")}>
+                  <span className={cn("size-5 rounded-full bg-chip", hidden && "translate-x-5")} />
+                </span>
+              </button>
+            ) : null}
             {error ? <p className="mt-3 text-sm text-expense">{error}</p> : null}
             {!isNew ? (
               <button
@@ -272,6 +292,8 @@ export function MoreView({
   const setShowReport = useLedger((s) => s.setShowReport);
   const currency = useLedger((s) => s.currency);
   const setCurrency = useLedger((s) => s.setCurrency);
+  const theme = useLedger((s) => s.theme);
+  const setTheme = useLedger((s) => s.setTheme);
   const [passMode, setPassMode] = useState<"create" | "change" | null>(null);
   const balance = totalBalance(accounts, entries);
   const first = entries[0]?.at.slice(0, 4);
@@ -323,6 +345,11 @@ export function MoreView({
         </select>
       </label>
       <p className="mt-2 px-1 text-sm leading-relaxed text-muted">Суммы не пересчитываются. Меняется только знак. «Другое» ведёт свою валюту.</p>
+      <p className="mt-5 text-sm text-muted">Тема</p>
+      <div className="mt-2 grid grid-cols-2 rounded-full bg-chip p-1">
+        <button type="button" onClick={() => setTheme("blue")} className={cn("h-10 rounded-full text-sm", theme !== "dark" ? "bg-surface font-medium" : "text-muted")}>Голубая</button>
+        <button type="button" onClick={() => setTheme("dark")} className={cn("h-10 rounded-full text-sm", theme === "dark" ? "bg-surface font-medium" : "text-muted")}>Тёмная</button>
+      </div>
 
       <div className="mt-5 grid gap-2">
         <button

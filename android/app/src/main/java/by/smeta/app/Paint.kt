@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,43 +45,83 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-val Desk = Color(0xFFE7DFD2)
-val Paper = Color(0xFFF4EFE6)
-val Surface = Color(0xFFFFFDF8)
-val Ink = Color(0xFF1C1712)
-val Muted = Color(0xFF6F675E)
-val Line = Color(0xFFE3D8C8)
-val Chip = Color(0xFFF1E9DC)
-val Expense = Color(0xFFB4332A)
-val Income = Color(0xFF1B6B45)
+data class Palette(
+    val desk: Color,
+    val paper: Color,
+    val surface: Color,
+    val ink: Color,
+    val muted: Color,
+    val line: Color,
+    val chip: Color,
+    val expense: Color,
+    val income: Color,
+)
+
+val BlueTheme = Palette(
+    desk = Color(0xFFD9E8F4),
+    paper = Color(0xFFEAF3FA),
+    surface = Color(0xFFFFFFFF),
+    ink = Color(0xFF143047),
+    muted = Color(0xFF5C7386),
+    line = Color(0xFFC9DCEC),
+    chip = Color(0xFFE3F0F8),
+    expense = Color(0xFFC4473C),
+    income = Color(0xFF1C7A56),
+)
+
+val DarkTheme = Palette(
+    desk = Color(0xFF0E1620),
+    paper = Color(0xFF15202B),
+    surface = Color(0xFF1E2C3A),
+    ink = Color(0xFFE7F0F7),
+    muted = Color(0xFF9AADBD),
+    line = Color(0xFF314556),
+    chip = Color(0xFF263646),
+    expense = Color(0xFFFF8A80),
+    income = Color(0xFF7DDBA8),
+)
+
+val LocalPalette = compositionLocalOf { BlueTheme }
+
+val Desk: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.desk
+val Paper: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.paper
+val Surface: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.surface
+val Ink: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.ink
+val Muted: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.muted
+val Line: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.line
+val Chip: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.chip
+val Expense: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.expense
+val Income: Color @Composable @ReadOnlyComposable get() = LocalPalette.current.income
 
 val Display = FontFamily(Font(R.font.literata_semibold, FontWeight.SemiBold))
 val Body = FontFamily(Font(R.font.manrope_medium, FontWeight.Medium), Font(R.font.manrope_semibold, FontWeight.SemiBold))
 
 fun parseHex(hex: String): Color {
-    val v = hex.removePrefix("#").toLongOrNull(16) ?: return Muted
+    val v = hex.removePrefix("#").toLongOrNull(16) ?: return Color(0xFF5C7386)
     return Color(0xFF000000 or v)
 }
 
 private val BYN = "M0.26 58.54L13.02 58.28L13.02 0.26L62.54 0.26L62.54 10.06L22.82 10.06L22.69 37.13L45.00 37.13L50.80 37.78L58.54 40.62L63.57 44.10L66.40 46.93L68.85 50.29L70.92 54.41L72.21 58.80L72.59 64.34L72.08 68.60L70.40 73.62L67.44 78.65L63.95 82.39L56.60 87.16L52.22 88.71L47.32 89.61L13.02 89.61L13.02 68.47L0.26 68.21L0.26 58.54ZM22.82 46.93L22.82 58.54L45.26 58.54L45.26 68.21L22.82 68.21L22.82 79.94L46.16 79.94L49.38 79.43L52.09 78.52L56.48 75.95L60.73 71.17L62.79 65.37L62.41 59.57L59.83 54.28L55.32 50.03L51.19 47.97L46.68 46.93L22.82 46.93Z"
 
 @Composable
-fun LineIcon(name: String, modifier: Modifier = Modifier, tint: Color = Ink, size: Dp = 22.dp) {
+fun LineIcon(name: String, modifier: Modifier = Modifier, tint: Color = Color.Unspecified, size: Dp = 22.dp) {
+    val paint = if (tint == Color.Unspecified) Ink else tint
     val paths = GLYPHS[name] ?: GLYPHS["ellipsis"]!!
     val parsed = remember(name) { paths.map { PathParser().parsePathString(it).toPath() } }
     Canvas(modifier.size(size)) {
         withTransform({ scale(this.size.minDimension / 24f, this.size.minDimension / 24f, Offset.Zero) }) {
-            parsed.forEach { drawPath(it, tint, style = Stroke(width = 1.75f, cap = StrokeCap.Round, join = StrokeJoin.Round)) }
+            parsed.forEach { drawPath(it, paint, style = Stroke(width = 1.75f, cap = StrokeCap.Round, join = StrokeJoin.Round)) }
         }
     }
 }
 
 @Composable
-fun BynMark(modifier: Modifier = Modifier, tint: Color = Ink, height: Dp = 14.dp) {
+fun BynMark(modifier: Modifier = Modifier, tint: Color = Color.Unspecified, height: Dp = 14.dp) {
+    val paint = if (tint == Color.Unspecified) Ink else tint
     val path = remember { PathParser().parsePathString(BYN).toPath() }
     Canvas(modifier.size(width = height * 0.8f, height = height)) {
         withTransform({ scale(size.width / 73f, size.height / 90f, Offset.Zero) }) {
-            drawPath(path, tint)
+            drawPath(path, paint)
         }
     }
 }
@@ -88,23 +129,25 @@ fun BynMark(modifier: Modifier = Modifier, tint: Color = Ink, height: Dp = 14.dp
 val LocalMoney = compositionLocalOf { "BYN" }
 
 @Composable
-fun MoneyText(cents: Long, modifier: Modifier = Modifier, color: Color = Ink, size: TextUnit = 16.sp, sign: Boolean = false, font: FontFamily = Body, weight: FontWeight = FontWeight.Medium, currency: String? = null) {
+fun MoneyText(cents: Long, modifier: Modifier = Modifier, color: Color = Color.Unspecified, size: TextUnit = 16.sp, sign: Boolean = false, font: FontFamily = Body, weight: FontWeight = FontWeight.Medium, currency: String? = null) {
+    val paint = if (color == Color.Unspecified) Ink else color
     val code = currency ?: LocalMoney.current
     androidx.compose.foundation.layout.Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        Text(formatMoney(cents, sign), color = color, fontFamily = font, fontSize = size, fontWeight = weight)
-        MoneyMark(code, color, (size.value * 0.62f).dp)
+        Text(formatMoney(cents, sign), color = paint, fontFamily = font, fontSize = size, fontWeight = weight)
+        MoneyMark(code, paint, (size.value * 0.62f).dp)
     }
 }
 
 @Composable
-fun MoneyMark(code: String, tint: Color = Ink, height: Dp = 14.dp) {
+fun MoneyMark(code: String, tint: Color = Color.Unspecified, height: Dp = 14.dp) {
+    val paint = if (tint == Color.Unspecified) Ink else tint
     val mark = when (code) { "EUR" -> "€"; "USD" -> "$"; "RUB" -> "₽"; else -> "" }
-    if (mark.isEmpty()) BynMark(tint = tint, height = height, modifier = Modifier.padding(start = 2.dp))
-    else Text(mark, color = tint, fontFamily = Body, fontSize = (height.value * 0.85f).sp, modifier = Modifier.padding(start = 2.dp))
+    if (mark.isEmpty()) BynMark(tint = paint, height = height, modifier = Modifier.padding(start = 2.dp))
+    else Text(mark, color = paint, fontFamily = Body, fontSize = (height.value * 0.85f).sp, modifier = Modifier.padding(start = 2.dp))
 }
 
 @Composable
-fun ForeignSum(cents: Long, currency: String, size: TextUnit = 22.sp, color: Color = Ink) {
+fun ForeignSum(cents: Long, currency: String, size: TextUnit = 22.sp, color: Color = Color.Unspecified) {
     MoneyText(cents, color = color, size = size, font = Display, weight = FontWeight.SemiBold, currency = currency)
 }
 
@@ -183,5 +226,8 @@ fun StationMark(station: Station, size: Dp = 32.dp) {
     }
 }
 
+@Composable
 fun fieldStyle() = TextStyle(color = Ink, fontFamily = Body, fontSize = 16.sp)
-val caret = SolidColor(Ink)
+
+@Composable
+fun caretBrush() = SolidColor(Ink)

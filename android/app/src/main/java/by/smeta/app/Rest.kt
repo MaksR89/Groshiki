@@ -456,6 +456,14 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
             }
         }
         Text("Суммы не пересчитываются. Меняется только знак.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
+        Text("Тема", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 16.dp))
+        Row(Modifier.padding(top = 8.dp).fillMaxWidth().clip(CircleShape).background(Chip).padding(4.dp)) {
+            listOf("blue" to "Голубая", "dark" to "Тёмная").forEach { (id, label) ->
+                Box(Modifier.weight(1f).height(40.dp).clip(CircleShape).background(if (book.theme == id) Surface else Color.Transparent).clickable { repo.update { it.copy(theme = id) } }, contentAlignment = Alignment.Center) {
+                    Text(label, color = if (book.theme == id) Ink else Muted, fontFamily = Body, fontSize = 14.sp, fontWeight = if (book.theme == id) FontWeight.Medium else FontWeight.Normal)
+                }
+            }
+        }
         SwitchRow("Показывать остаток", book.showBalance) { repo.update { it.copy(showBalance = !it.showBalance) } }
         Text("Это текущий остаток счёта, не оборот за всё время.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp, start = 4.dp))
         Text("Расходы и доходы всегда в меню. Остальные разделы можно выключить.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 12.dp, start = 4.dp))
@@ -485,7 +493,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
                 Text("Отмена", color = Ink, modifier = Modifier.clickable { confirm = false }.padding(10.dp))
             }
         }
-        Text("Версия 1.5.12", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
+        Text("Версия 1.5.13", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
     }
     if (pass != null) Column(Modifier.fillMaxSize().background(Desk)) {
         LockBody(repo, if (pass == "create") "create" else "change", "Другое") { pass = null }
@@ -579,11 +587,12 @@ fun CategoriesScreen(repo: Repo, onBack: () -> Unit) {
         (shown + Category("", "Новая", side, "", "ellipsis", SWATCHES[0])).chunked(4).forEach { row ->
             Row(Modifier.padding(top = 8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 row.forEach { cat ->
-                    Column(Modifier.weight(1f).height(80.dp).clip(RoundedCornerShape(16.dp)).background(if (cat.id.isEmpty()) Chip else Surface).clickable {
+                    Column(Modifier.weight(1f).height(96.dp).clip(RoundedCornerShape(16.dp)).background(if (cat.id.isEmpty()) Chip else Surface).clickable {
                         editing = if (cat.id.isEmpty()) Category("", "", side, "", "ellipsis", SWATCHES[0]) else cat
                     }, horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                        if (cat.id.isNotEmpty()) LineIcon(cat.icon, tint = parseHex(cat.color), size = 24.dp)
-                        Text(if (cat.id.isEmpty()) "Новая" else cat.name, color = Ink, fontFamily = Body, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 2)
+                        if (cat.id.isNotEmpty()) LineIcon(cat.icon, tint = parseHex(cat.color).copy(alpha = if (cat.hidden) 0.35f else 1f), size = 24.dp)
+                        Text(if (cat.id.isEmpty()) "Новая" else cat.name, color = Ink.copy(alpha = if (cat.hidden) 0.4f else 1f), fontFamily = Body, fontSize = 12.sp, textAlign = TextAlign.Center, maxLines = 2)
+                        if (cat.hidden) Text("скрыта", color = Muted, fontFamily = Body, fontSize = 11.sp)
                     }
                 }
                 repeat(4 - row.size) { Spacer(Modifier.weight(1f)) }
@@ -595,32 +604,46 @@ fun CategoriesScreen(repo: Repo, onBack: () -> Unit) {
 
 @Composable
 private fun CategorySheet(repo: Repo, category: Category, onClose: () -> Unit) {
+    val fresh = category.id.isEmpty()
     var name by remember { mutableStateOf(category.name) }
     var group by remember { mutableStateOf(category.group) }
     var kind by remember { mutableStateOf(category.kind) }
     var icon by remember { mutableStateOf(category.icon) }
     var color by remember { mutableStateOf(category.color) }
+    var hidden by remember { mutableStateOf(category.hidden) }
     var error by remember { mutableStateOf<String?>(null) }
-    Sheet(if (category.id.isEmpty()) "Новая статья" else "Статья", name.isNotBlank(), onClose, {
-        val trimmed = name.trim()
-        if (trimmed.isEmpty()) error = "Нужно название."
-        else if (category.id.isEmpty()) { repo.addCategory(trimmed, kind, group.trim(), icon, color); onClose() }
-        else { repo.updateCategory(category.id, Category(category.id, trimmed, kind, group.trim(), icon, color)); onClose() }
+    Sheet(if (fresh) "Новая статья" else "Статья", fresh || name.isNotBlank(), onClose, {
+        if (fresh) {
+            val trimmed = name.trim()
+            if (trimmed.isEmpty()) error = "Нужно название."
+            else { repo.addCategory(trimmed, kind, group.trim(), icon, color); onClose() }
+        } else {
+            repo.updateCategory(category.id, category.copy(icon = icon, color = color, hidden = hidden))
+            onClose()
+        }
     }, Ink) {
         Column(Modifier.weight(1f).verticalScroll(rememberScrollState()).padding(16.dp)) {
-            Field(name, { name = it }, "Название")
-            Field(group, { group = it }, "Группа, если нужна")
-            Row(Modifier.padding(top = 12.dp).fillMaxWidth().clip(CircleShape).background(Chip).padding(4.dp)) {
-                listOf("expense" to "Расход", "income" to "Доход", "both" to "Обе").forEach { (id, label) ->
-                    Box(Modifier.weight(1f).height(36.dp).clip(CircleShape).background(if (kind == id) Surface else Color.Transparent).clickable { kind = id }, contentAlignment = Alignment.Center) {
-                        Text(label, color = if (kind == id) Ink else Muted, fontSize = 14.sp, fontFamily = Body)
+            if (fresh) {
+                Field(name, { name = it }, "Название")
+                Field(group, { group = it }, "Группа, если нужна")
+                Row(Modifier.padding(top = 12.dp).fillMaxWidth().clip(CircleShape).background(Chip).padding(4.dp)) {
+                    listOf("expense" to "Расход", "income" to "Доход", "both" to "Обе").forEach { (id, label) ->
+                        Box(Modifier.weight(1f).height(36.dp).clip(CircleShape).background(if (kind == id) Surface else Color.Transparent).clickable { kind = id }, contentAlignment = Alignment.Center) {
+                            Text(label, color = if (kind == id) Ink else Muted, fontSize = 14.sp, fontFamily = Body)
+                        }
                     }
                 }
+            } else {
+                Text(category.name, color = Ink, fontFamily = Display, fontSize = 24.sp)
+                if (category.group.isNotBlank()) Text(category.group, color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
+                Text(when (category.kind) { "income" -> "Доход"; "both" -> "Доход и расход"; else -> "Расход" }, color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp))
+                Text("Название и вид не меняются: старые записи останутся на этой статье.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
             }
             Swatches(color) { color = it }
             IconGrid(icon, parseHex(color)) { icon = it }
+            if (!fresh) SwitchRow("Скрыть", hidden) { hidden = !hidden }
             error?.let { Text(it, color = Expense, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 12.dp)) }
-            if (category.id.isNotEmpty()) Text("Удалить статью", color = Expense, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 24.dp).clickable {
+            if (!fresh) Text("Удалить статью", color = Expense, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 24.dp).clickable {
                 val message = repo.removeCategory(category.id)
                 if (message != null) error = message else onClose()
             })
@@ -653,7 +676,7 @@ fun IconGrid(icon: String, tint: Color, onPick: (String) -> Unit) {
 
 @Composable
 fun Field(value: String, onChange: (String) -> Unit, placeholder: String) {
-    BasicTextField(value, onChange, textStyle = fieldStyle(), cursorBrush = caret, modifier = Modifier.padding(top = 8.dp).fillMaxWidth().height(44.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).background(Surface, RoundedCornerShape(12.dp)).padding(12.dp), decorationBox = { inner ->
+    BasicTextField(value, onChange, textStyle = fieldStyle(), cursorBrush = caretBrush(), modifier = Modifier.padding(top = 8.dp).fillMaxWidth().height(44.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).background(Surface, RoundedCornerShape(12.dp)).padding(12.dp), decorationBox = { inner ->
         Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
             if (value.isEmpty()) Text(placeholder, color = Muted, fontFamily = Body)
             inner()

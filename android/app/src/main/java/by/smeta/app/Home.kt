@@ -1,5 +1,6 @@
 package by.smeta.app
 
+import android.app.Activity
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.Context
@@ -35,7 +36,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -66,6 +70,16 @@ fun GroshikiApp(repo: Repo) {
         if (left > 0) delay(left)
         splash = false
     }
+    val palette = if (repo.book.theme == "dark") DarkTheme else BlueTheme
+    val view = LocalView.current
+    SideEffect {
+        val window = (view.context as? Activity)?.window ?: return@SideEffect
+        val controller = WindowCompat.getInsetsController(window, view)
+        val light = repo.book.theme != "dark"
+        controller.isAppearanceLightStatusBars = light
+        controller.isAppearanceLightNavigationBars = light
+    }
+    CompositionLocalProvider(LocalPalette provides palette) {
     if (splash) {
         Box(Modifier.fillMaxSize().background(Desk), contentAlignment = Alignment.Center) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -73,9 +87,10 @@ fun GroshikiApp(repo: Repo) {
                 Text("Книга учета доходов и расходов", color = Muted, fontFamily = Body, fontSize = 16.sp, modifier = Modifier.padding(top = 8.dp))
             }
         }
-        return
+    } else {
+        Shell(repo)
     }
-    Shell(repo)
+    }
 }
 
 @Composable
@@ -275,7 +290,7 @@ private fun FeedScreen(repo: Repo, kind: String, onOpen: (Entry) -> Unit, onChar
                 query,
                 { query = it; limit = 40 },
                 textStyle = fieldStyle(),
-                cursorBrush = caret,
+                cursorBrush = caretBrush(),
                 modifier = Modifier.padding(start = 8.dp).fillMaxWidth(),
                 decorationBox = { inner ->
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
@@ -414,7 +429,7 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
     var confirm by remember { mutableStateOf(false) }
     var adding by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val ranked = book.categories.filter { it.kind == kind || it.kind == "both" }.sortedWith(compareByDescending<Category> { cat -> book.entries.count { it.categoryId == cat.id && it.kind == kind } }.thenBy { it.name })
+    val ranked = book.categories.filter { (it.kind == kind || it.kind == "both") && (!it.hidden || it.id == categoryId) }.sortedWith(compareByDescending<Category> { cat -> book.entries.count { it.categoryId == cat.id && it.kind == kind } }.thenBy { it.name })
     val cents = inputToCents(raw)
     val canSave = cents > 0 && if (kind == "transfer") accountId.isNotBlank() && toId.isNotBlank() && accountId != toId else categoryId != null && accountId.isNotBlank()
     fun save() {
@@ -445,7 +460,7 @@ private fun ComposerSheet(repo: Repo, initial: String, editing: Entry?, onClose:
                 Picker(date, Modifier.weight(1f)) { pickDate(context, date) { date = it } }
                 Picker(time, Modifier.weight(1f)) { pickTime(context, time) { time = it } }
             }
-            BasicTextField(note, { note = it.take(200) }, textStyle = fieldStyle(), cursorBrush = caret, modifier = Modifier.padding(top = 8.dp).fillMaxWidth().height(44.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).padding(horizontal = 12.dp, vertical = 10.dp), decorationBox = { inner ->
+            BasicTextField(note, { note = it.take(200) }, textStyle = fieldStyle(), cursorBrush = caretBrush(), modifier = Modifier.padding(top = 8.dp).fillMaxWidth().height(44.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).padding(horizontal = 12.dp, vertical = 10.dp), decorationBox = { inner ->
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
                     if (note.isEmpty()) Text("Заметка", color = Muted, fontFamily = Body)
                     inner()

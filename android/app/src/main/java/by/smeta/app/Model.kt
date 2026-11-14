@@ -5,7 +5,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 data class Account(val id: String, val name: String, val opening: Long, val color: String)
-data class Category(val id: String, val name: String, val kind: String, val group: String, val icon: String, val color: String)
+data class Category(val id: String, val name: String, val kind: String, val group: String, val icon: String, val color: String, val hidden: Boolean = false)
 data class Entry(
     val id: String,
     val kind: String,
@@ -48,6 +48,7 @@ data class Book(
     val showReserve: Boolean = false,
     val reserveHash: String = "",
     val currency: String = "BYN",
+    val theme: String = "blue",
 )
 
 fun newId(prefix: String) = "$prefix-${UUID.randomUUID()}"
@@ -69,7 +70,7 @@ fun totalBalance(book: Book) = book.accounts.sumOf { accountBalance(it, book.ent
 
 fun Book.toJson(): JSONObject = JSONObject().apply {
     put("accounts", JSONArray().apply { accounts.forEach { put(JSONObject().put("id", it.id).put("name", it.name).put("opening", it.opening).put("color", it.color)) } })
-    put("categories", JSONArray().apply { categories.forEach { put(JSONObject().put("id", it.id).put("name", it.name).put("kind", it.kind).put("group", it.group).put("icon", it.icon).put("color", it.color)) } })
+    put("categories", JSONArray().apply { categories.forEach { put(JSONObject().put("id", it.id).put("name", it.name).put("kind", it.kind).put("group", it.group).put("icon", it.icon).put("color", it.color).put("hidden", it.hidden)) } })
     put("entries", JSONArray().apply {
         entries.forEach {
             put(JSONObject().put("id", it.id).put("kind", it.kind).put("amount", it.amount).put("categoryId", it.categoryId ?: JSONObject.NULL).put("accountId", it.accountId).put("toAccountId", it.toAccountId ?: JSONObject.NULL).put("note", it.note).put("at", it.at))
@@ -88,6 +89,7 @@ fun Book.toJson(): JSONObject = JSONObject().apply {
     put("showReserve", showReserve)
     put("reserveHash", reserveHash)
     put("currency", currency)
+    put("theme", theme)
 }
 
 private fun MoneyRow.toJson(withWho: Boolean): JSONObject = JSONObject().put("id", id).put("amount", amount).put("currency", currency).put("note", note).put("at", at).apply {
@@ -115,6 +117,7 @@ fun bookFromJson(raw: JSONObject): Book {
         showReserve = root.optBoolean("showReserve", false),
         reserveHash = root.optString("reserveHash", ""),
         currency = root.optString("currency", "BYN").let { if (it in setOf("BYN", "USD", "EUR", "RUB")) it else "BYN" },
+        theme = if (root.optString("theme") == "dark") "dark" else "blue",
     ).withOperators()
 }
 
@@ -125,7 +128,7 @@ fun Book.withOperators(): Book {
 }
 
 private fun JSONObject.toAccount() = Account(optString("id"), optString("name"), optLong("opening"), optString("color", "#2f5573"))
-private fun JSONObject.toCategory() = Category(optString("id"), optString("name"), optString("kind", "expense"), optString("group"), optString("icon", "ellipsis"), optString("color", "#5c5348"))
+private fun JSONObject.toCategory() = Category(optString("id"), optString("name"), optString("kind", "expense"), optString("group"), optString("icon", "ellipsis"), optString("color", "#5c5348"), optBoolean("hidden", false))
 private fun JSONObject.toEntry() = Entry(optString("id"), optString("kind"), optLong("amount"), optString("categoryId").ifBlank { null }, optString("accountId"), optString("toAccountId").ifBlank { null }, optString("note"), optString("at"))
 private fun JSONObject.toStation() = Station(optString("id"), optString("name"), optString("icon", "plug"), optString("color", "#5c5348"), optString("logo"))
 private fun JSONObject.toCharge() = Charge(optString("id"), optString("stationId"), optLong("kwh"), optLong("rate"), optLong("price"), optString("at"))
