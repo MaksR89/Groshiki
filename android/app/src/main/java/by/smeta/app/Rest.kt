@@ -416,6 +416,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
     var confirm by remember { mutableStateOf(false) }
     var pass by remember { mutableStateOf<String?>(null) }
     var currencyOpen by remember { mutableStateOf(false) }
+    var themeOpen by remember { mutableStateOf(false) }
     val open = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         if (uri == null) return@rememberLauncherForActivityResult
         val name = context.contentResolver.query(uri, null, null, null, null)?.use { c ->
@@ -446,7 +447,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
         Text("Валюта учёта", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 16.dp))
         val currencies = listOf("BYN" to "Бел. рубль", "USD" to "Доллар", "EUR" to "Евро", "RUB" to "Росс. рубль")
         val current = currencies.find { it.first == book.currency }?.second ?: "Бел. рубль"
-        Row(Modifier.padding(top = 4.dp).fillMaxWidth().height(48.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).background(Surface, RoundedCornerShape(12.dp)).clickable { currencyOpen = !currencyOpen }.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.padding(top = 4.dp).fillMaxWidth().height(48.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).background(Surface, RoundedCornerShape(12.dp)).clickable { currencyOpen = !currencyOpen; themeOpen = false }.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
             Text(current, color = Ink, fontFamily = Body, modifier = Modifier.weight(1f))
             LineIcon("chevron-down", tint = Muted, size = 20.dp, modifier = Modifier.rotate(if (currencyOpen) 180f else 0f))
         }
@@ -457,15 +458,15 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
         }
         Text("Суммы не пересчитываются. Меняется только знак.", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 8.dp))
         Text("Тема", color = Muted, fontFamily = Body, fontSize = 14.sp, modifier = Modifier.padding(top = 16.dp))
-        Column(Modifier.padding(top = 8.dp).fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(Chip).padding(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            listOf("blue" to "Голубая", "beige" to "Бежевая", "cloud" to "Белая", "dark" to "Тёмная").chunked(2).forEach { row ->
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    row.forEach { (id, label) ->
-                        Box(Modifier.weight(1f).height(40.dp).clip(RoundedCornerShape(16.dp)).background(if (book.theme == id) Surface else Color.Transparent).clickable { repo.update { it.copy(theme = id) } }, contentAlignment = Alignment.Center) {
-                            Text(label, color = if (book.theme == id) Ink else Muted, fontFamily = Body, fontSize = 14.sp, fontWeight = if (book.theme == id) FontWeight.Medium else FontWeight.Normal)
-                        }
-                    }
-                }
+        val themes = listOf("blue" to "Голубая", "beige" to "Бежевая", "cloud" to "Белая", "dark" to "Тёмная")
+        val themeName = themes.find { it.first == book.theme }?.second ?: "Голубая"
+        Row(Modifier.padding(top = 4.dp).fillMaxWidth().height(48.dp).border(1.dp, Line, RoundedCornerShape(12.dp)).background(Surface, RoundedCornerShape(12.dp)).clickable { themeOpen = !themeOpen; currencyOpen = false }.padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(themeName, color = Ink, fontFamily = Body, modifier = Modifier.weight(1f))
+            LineIcon("chevron-down", tint = Muted, size = 20.dp, modifier = Modifier.rotate(if (themeOpen) 180f else 0f))
+        }
+        if (themeOpen) Column(Modifier.padding(top = 8.dp).clip(RoundedCornerShape(12.dp)).background(Surface)) {
+            themes.forEach { (id, label) ->
+                Text(label, color = Ink, fontFamily = Body, modifier = Modifier.fillMaxWidth().background(if (book.theme == id) Chip else Color.Transparent).clickable { repo.update { it.copy(theme = id) }; themeOpen = false }.padding(horizontal = 12.dp, vertical = 12.dp))
             }
         }
         SwitchRow("Показывать остаток", book.showBalance) { repo.update { it.copy(showBalance = !it.showBalance) } }
@@ -497,7 +498,7 @@ fun BookScreen(repo: Repo, onAccounts: () -> Unit, onCategories: () -> Unit) {
                 Text("Отмена", color = Ink, modifier = Modifier.clickable { confirm = false }.padding(10.dp))
             }
         }
-        Text("Версия 1.5.14", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
+        Text("Версия 1.5.15", color = Muted, fontFamily = Body, fontSize = 13.sp, modifier = Modifier.padding(top = 24.dp, bottom = 16.dp))
     }
     if (pass != null) Column(Modifier.fillMaxSize().background(Desk)) {
         LockBody(repo, if (pass == "create") "create" else "change", "Другое") { pass = null }

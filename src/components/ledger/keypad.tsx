@@ -36,7 +36,7 @@ export function Keypad({ onKey, signed }: { onKey: (key: string) => void; signed
           key={key}
           type="button"
           onClick={() => onKey(key)}
-          className={cn("flex h-12 items-center justify-center rounded-2xl text-xl", "+−×÷".includes(key) ? "bg-chip" : "bg-surface")}
+          className={cn("flex h-12 items-center justify-center rounded-2xl border border-line text-xl", "+−×÷".includes(key) ? "bg-chip" : "bg-surface")}
         >
           {key === "⌫" ? <Delete className="size-5" aria-label="Стереть" /> : key}
         </button>

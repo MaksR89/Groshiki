@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
@@ -82,13 +83,13 @@ val BeigeTheme = Palette(
 )
 
 val CloudTheme = Palette(
-    desk = Color(0xFFF0EEE9),
-    paper = Color(0xFFF0EEE9),
+    desk = Color(0xFFFFFFFF),
+    paper = Color(0xFFFFFFFF),
     surface = Color(0xFFFFFFFF),
-    ink = Color(0xFF2A2826),
-    muted = Color(0xFF746F68),
-    line = Color(0xFFE3E0D9),
-    chip = Color(0xFFE6E3DC),
+    ink = Color(0xFF161616),
+    muted = Color(0xFF6A6A6A),
+    line = Color(0xFFE6E6E6),
+    chip = Color(0xFFF2F2F2),
     expense = Color(0xFFC4473C),
     income = Color(0xFF1C7A56),
 )
@@ -203,7 +204,7 @@ private fun PadKey(key: String, modifier: Modifier, onKey: (String) -> Unit) {
     val op = key in setOf("+", "−", "×", "÷", "±")
     val eq = key == "="
     Box(
-        modifier.height(48.dp).clip(RoundedCornerShape(16.dp)).background(when { eq -> Ink; op -> Chip; else -> Surface }).clickable { onKey(key) },
+        modifier.height(48.dp).clip(RoundedCornerShape(16.dp)).background(when { eq -> Ink; op -> Chip; else -> Surface }).then(if (eq) Modifier else Modifier.border(1.dp, Line, RoundedCornerShape(16.dp))).clickable { onKey(key) },
         contentAlignment = Alignment.Center,
     ) {
         if (key == "⌫") LineIcon("delete", tint = Ink, size = 20.dp) else Text(key, color = if (eq) Surface else Ink, fontFamily = Body, fontSize = if (eq) 22.sp else 20.sp)
